@@ -157,6 +157,16 @@ export function createWidgetElement(widget, actions) {
 /* ========================================================================= */
 
 function buildButtonWidget(card, widget, actions) {
+  const isViewBtn = Boolean(
+    widget.cmd_mem ||
+    widget.id.includes("_v_") ||
+    (widget.command && widget.command.startsWith("sim/view/"))
+  );
+
+  if (isViewBtn) {
+    card.classList.add("widget-view-button");
+  }
+
   if (widget.led_mode === "none" || !widget.status_dataref) {
     card.classList.add("led-hidden");
   }
@@ -175,12 +185,40 @@ function buildButtonWidget(card, widget, actions) {
     body.appendChild(img);
   }
 
+  // Header with slot badge & inline edit pencil for view buttons
+  if (isViewBtn) {
+    const vHeader = document.createElement("div");
+    vHeader.className = "view-btn-header";
+
+    const badge = document.createElement("span");
+    badge.className = "view-slot-badge";
+    badge.textContent = widget.sublabel || (widget.col < 4 ? `INT ${widget.row * 4 + widget.col + 1}` : `EXT ${widget.row * 4 + (widget.col - 4) + 1}`);
+    vHeader.appendChild(badge);
+
+    if (widget.cmd_mem) {
+      const memHint = document.createElement("span");
+      memHint.className = "view-mem-hint";
+      memHint.title = "Tieni premuto 1 sec per memorizzare la vista";
+      memHint.textContent = "REC";
+      vHeader.appendChild(memHint);
+    }
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "view-edit-trigger";
+    editBtn.title = "Rinomina vista (o doppio tap)";
+    editBtn.textContent = "✎";
+    vHeader.appendChild(editBtn);
+
+    card.appendChild(vHeader);
+  }
+
   const labelEl = document.createElement("div");
   labelEl.className = "btn-label";
   labelEl.textContent = widget.label;
   body.appendChild(labelEl);
 
-  if (widget.sublabel) {
+  if (widget.sublabel && !isViewBtn) {
     const subEl = document.createElement("div");
     subEl.className = "btn-sublabel";
     subEl.textContent = widget.sublabel;
@@ -191,16 +229,148 @@ function buildButtonWidget(card, widget, actions) {
   card.appendChild(body);
 
   if (!actions.isEditMode) {
+    let isEditing = false;
+
+    const startInlineEdit = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (isEditing || actions.isEditMode) return;
+      isEditing = true;
+      card.classList.add("is-renaming");
+
+      const editWrap = document.createElement("div");
+      editWrap.className = "view-inline-edit-wrap";
+      editWrap.innerHTML = `
+        <input type="text" class="view-inline-input" value="${escapeHtml(widget.label)}" maxlength="22" spellcheck="false" />
+        <div class="view-inline-btns">
+          <button type="button" class="view-inline-btn view-inline-save" title="Salva etichetta">✓</button>
+          <button type="button" class="view-inline-btn view-inline-cancel" title="Annulla">✕</button>
+        </div>
+      `;
+
+      const input = editWrap.querySelector(".view-inline-input");
+      const btnSave = editWrap.querySelector(".view-inline-save");
+      const btnCancel = editWrap.querySelector(".view-inline-cancel");
+
+      const finishEdit = (save) => {
+        if (!isEditing) return;
+        isEditing = false;
+        card.classList.remove("is-renaming");
+        const newVal = input.value.trim();
+        editWrap.remove();
+        if (save && newVal && newVal !== widget.label) {
+          widget.label = newVal;
+          labelEl.textContent = newVal;
+          playCockpitTick(1200, 16);
+          if (typeof actions.saveWidgetLabel === "function") {
+            actions.saveWidgetLabel(widget.id, newVal);
+          }
+        }
+      };
+
+      editWrap.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+      editWrap.addEventListener("click", (ev) => ev.stopPropagation());
+
+      btnSave.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        finishEdit(true);
+      });
+
+      btnCancel.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        finishEdit(false);
+      });
+
+      input.addEventListener("keydown", (ev) => {
+        ev.stopPropagation();
+        if (ev.key === "Enter") {
+          ev.preventDefault();
+          finishEdit(true);
+        } else if (ev.key === "Escape") {
+          ev.preventDefault();
+          finishEdit(false);
+        }
+      });
+
+      body.appendChild(editWrap);
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 50);
+    };
+
+    if (isViewBtn) {
+      const editTrigger = card.querySelector(".view-edit-trigger");
+      if (editTrigger) {
+        editTrigger.addEventListener("pointerdown", startInlineEdit);
+      }
+      labelEl.addEventListener("dblclick", startInlineEdit);
+    }
+
+    const activateThisView = () => {
+      document.querySelectorAll(".widget-view-button.is-active-view").forEach((el) => {
+        el.classList.remove("is-active-view");
+      });
+      card.classList.add("is-active-view");
+      window._activeViewId = widget.id;
+    };
+
+    let memTimer = null;
+    let longPressFired = false;
+
     card.addEventListener("pointerdown", (e) => {
+      if (isEditing) return;
       e.preventDefault();
       card.classList.add("pressed");
+      longPressFired = false;
       playCockpitTick(1100, 14);
-      triggerButtonAction(widget, actions);
+
+      if (isViewBtn && widget.cmd_mem) {
+        card.classList.add("memorizing-active");
+        memTimer = setTimeout(() => {
+          longPressFired = true;
+          card.classList.remove("memorizing-active");
+          actions.sendCommand(widget.cmd_mem);
+          playCockpitTick(1400, 30);
+          setTimeout(() => playCockpitTick(1700, 25), 80);
+          if (typeof actions.showToast === "function") {
+            actions.showToast(`Vista salvata in: ${widget.label}`);
+          }
+          card.classList.add("flash-saved");
+          setTimeout(() => card.classList.remove("flash-saved"), 450);
+          activateThisView();
+        }, 750);
+      }
     });
-    const release = () => card.classList.remove("pressed");
-    card.addEventListener("pointerup", release);
-    card.addEventListener("pointerleave", release);
-    card.addEventListener("pointercancel", release);
+
+    const handleRelease = (e) => {
+      if (isEditing) return;
+      card.classList.remove("pressed");
+      card.classList.remove("memorizing-active");
+      clearTimeout(memTimer);
+      if (!longPressFired && e.type === "pointerup") {
+        if (isViewBtn) {
+          activateThisView();
+        }
+        triggerButtonAction(widget, actions);
+      }
+    };
+
+    card.addEventListener("pointerup", handleRelease);
+    card.addEventListener("pointerleave", () => {
+      clearTimeout(memTimer);
+      card.classList.remove("pressed");
+      card.classList.remove("memorizing-active");
+    });
+    card.addEventListener("pointercancel", () => {
+      clearTimeout(memTimer);
+      card.classList.remove("pressed");
+      card.classList.remove("memorizing-active");
+    });
   }
 }
 
@@ -467,6 +637,18 @@ function buildKnobWidget(card, widget, actions) {
   `;
   header.appendChild(titleWrap);
 
+  let stepToggleBtn = null;
+  if (widget.step_toggle_dataref) {
+    stepToggleBtn = document.createElement("button");
+    stepToggleBtn.type = "button";
+    stepToggleBtn.className = "knob-step-toggle";
+    stepToggleBtn.title = "Seleziona passo 100 ft / 1000 ft";
+    const curStep = actions.getDatarefValue(widget.step_toggle_dataref) ?? 0;
+    stepToggleBtn.innerHTML = `<span class="step-lbl">STEP</span> <span class="step-val">${curStep >= 0.5 ? "1000" : "100"}</span>`;
+    stepToggleBtn.classList.toggle("active", curStep >= 0.5);
+    header.appendChild(stepToggleBtn);
+  }
+
   const initVal = actions.getDatarefValue(widget.status_dataref || widget.write_dataref);
   if (hasDref) {
     const lcd = document.createElement("div");
@@ -540,12 +722,15 @@ function buildKnobWidget(card, widget, actions) {
     if (hasPush) {
       pushBadge = document.createElement("button");
       pushBadge.type = "button";
-      pushBadge.className = "knob-cap-btn push-cap";
+      const isBaroStd = widget.push_label === "STD" || widget.cmd_push === "AirbusFBW/BaroStdCapt";
+      pushBadge.className = `knob-cap-btn push-cap ${isBaroStd ? "baro-std-btn" : ""}`;
       const pSub = widget.push_label && widget.push_label !== "PUSH" ? widget.push_label : "SYNC";
-      pushBadge.innerHTML = `
-        <span class="cap-tag">⬇ PUSH</span>
-        <span class="cap-val">${escapeHtml(pSub)}</span>
-      `;
+      pushBadge.innerHTML = isBaroStd
+        ? `<span class="cap-val">${escapeHtml(widget.push_label)}</span>`
+        : `
+          <span class="cap-tag">⬇ PUSH</span>
+          <span class="cap-val">${escapeHtml(pSub)}</span>
+        `;
       centerCol.appendChild(pushBadge);
     }
 
@@ -560,12 +745,15 @@ function buildKnobWidget(card, widget, actions) {
     if (hasPull) {
       pullBadge = document.createElement("button");
       pullBadge.type = "button";
-      pullBadge.className = "knob-cap-btn pull-cap";
+      const isBaroUnit = widget.pull_label === "inHg/hPa" || widget.cmd_pull === "AirbusFBW/BaroUnitCapt";
+      pullBadge.className = `knob-cap-btn pull-cap ${isBaroUnit ? "baro-unit-btn" : ""}`;
       const plSub = widget.pull_label && widget.pull_label !== "PULL" ? widget.pull_label : "SEL";
-      pullBadge.innerHTML = `
-        <span class="cap-tag">⬆ PULL</span>
-        <span class="cap-val">${escapeHtml(plSub)}</span>
-      `;
+      pullBadge.innerHTML = isBaroUnit
+        ? `<span class="cap-val">${escapeHtml(widget.pull_label)}</span>`
+        : `
+          <span class="cap-tag">⬆ PULL</span>
+          <span class="cap-val">${escapeHtml(plSub)}</span>
+        `;
       centerCol.appendChild(pullBadge);
     }
 
@@ -653,6 +841,28 @@ function buildKnobWidget(card, widget, actions) {
         return;
       }
 
+      // Special handling for Barometer (inHg / hPa dual units)
+      if (targetDref.includes("barometer_setting_in_hg")) {
+        const isUnitInHg = (actions.getDatarefValue("AirbusFBW/BaroUnitCapt") ?? 0) >= 0.5;
+        const step = isUnitInHg ? (isCoarse ? 0.10 : 0.01) : (isCoarse ? 0.2953 : 0.02953);
+        let nextBaro = Number(currentRaw) + direction * step;
+        nextBaro = Math.max(27.0, Math.min(32.5, nextBaro));
+        nextBaro = Number(nextBaro.toFixed(4));
+        actions.writeDataref(targetDref, nextBaro);
+        updateKnobVisuals(card, widget, nextBaro);
+        return;
+      }
+
+      if (widget.step_toggle_dataref) {
+        const is1000 = (actions.getDatarefValue(widget.step_toggle_dataref) ?? 0) >= 0.5;
+        const altStep = isCoarse ? 1000.0 : (is1000 ? 1000.0 : 100.0);
+        let nextAlt = Number(currentRaw) + direction * altStep;
+        nextAlt = Math.max(Number(widget.min_value ?? 0), Math.min(Number(widget.max_value ?? 49000), nextAlt));
+        actions.writeDataref(targetDref, nextAlt);
+        updateKnobVisuals(card, widget, nextAlt);
+        return;
+      }
+
       const step = isCoarse ? Number(widget.step_coarse || widget.step_fine || 10) : Number(widget.step_fine || 1);
       let nextVal = Number(currentRaw) + direction * step;
 
@@ -687,6 +897,14 @@ function buildKnobWidget(card, widget, actions) {
       dialWrap.classList.remove("pushed");
       if (pushBadge) pushBadge.classList.remove("flash");
     }, 220);
+
+    if (widget.cmd_push === "AirbusFBW/BaroStdCapt") {
+      const cur = actions.getDatarefValue(widget.cmd_push) ?? 0;
+      const nextV = cur >= 0.5 ? 0.0 : 1.0;
+      actions.writeDataref(widget.cmd_push, nextV);
+      playCockpitTick(nextV >= 0.5 ? 1200 : 700, 16);
+      return;
+    }
     actions.sendCommand(widget.cmd_push);
   };
 
@@ -699,6 +917,14 @@ function buildKnobWidget(card, widget, actions) {
       dialWrap.classList.remove("pulled");
       if (pullBadge) pullBadge.classList.remove("flash");
     }, 260);
+
+    if (widget.cmd_pull === "AirbusFBW/BaroUnitCapt") {
+      const cur = actions.getDatarefValue(widget.cmd_pull) ?? 0;
+      const nextV = cur >= 0.5 ? 0.0 : 1.0;
+      actions.writeDataref(widget.cmd_pull, nextV);
+      playCockpitTick(nextV >= 0.5 ? 1100 : 850, 16);
+      return;
+    }
     actions.sendCommand(widget.cmd_pull);
   };
 
@@ -707,6 +933,20 @@ function buildKnobWidget(card, widget, actions) {
   bindRepeatableStepButton(btnIncFine, () => executeKnobStep(1, false));
   if (btnDecCoarse) bindRepeatableStepButton(btnDecCoarse, () => executeKnobStep(-1, true));
   if (btnIncCoarse) bindRepeatableStepButton(btnIncCoarse, () => executeKnobStep(1, true));
+
+  if (stepToggleBtn && !actions.isEditMode) {
+    stepToggleBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const nowVal = actions.getDatarefValue(widget.step_toggle_dataref) ?? 0;
+      const nextVal = nowVal >= 0.5 ? 0.0 : 1.0;
+      actions.writeDataref(widget.step_toggle_dataref, nextVal);
+      playCockpitTick(nextVal >= 0.5 ? 1200 : 800, 14);
+      const valEl = stepToggleBtn.querySelector(".step-val");
+      if (valEl) valEl.textContent = nextVal >= 0.5 ? "1000" : "100";
+      stepToggleBtn.classList.toggle("active", nextVal >= 0.5);
+    });
+  }
 
   if (pushBadge) {
     pushBadge.addEventListener("pointerdown", (e) => {
@@ -2127,7 +2367,17 @@ export function updateWidgetTelemetry(card, widget, datarefs) {
   const primaryRaw = widget.status_dataref ? datarefs[widget.status_dataref] : undefined;
 
   if (widget.type === "button") {
-    const isActive = evaluateLedState(primaryRaw, widget);
+    let raw = primaryRaw;
+    if (
+      widget.secondary_dataref &&
+      (raw === undefined || Number(raw) < (widget.led_threshold ?? 0.5))
+    ) {
+      const sec = datarefs[widget.secondary_dataref];
+      if (sec !== undefined && Number(sec) >= (widget.led_threshold ?? 0.5)) {
+        raw = sec;
+      }
+    }
+    const isActive = evaluateLedState(raw, widget);
     card.classList.toggle("is-active", isActive);
     const img = card.querySelector(".btn-texture-img");
     if (img) {
@@ -2140,6 +2390,53 @@ export function updateWidgetTelemetry(card, widget, datarefs) {
   } else if (widget.type === "knob") {
     const val = primaryRaw ?? (widget.write_dataref ? datarefs[widget.write_dataref] : undefined);
     updateKnobVisuals(card, widget, val);
+
+    // If widget has step_toggle_dataref (e.g. ALT 100/1000 step)
+    if (widget.step_toggle_dataref && datarefs[widget.step_toggle_dataref] !== undefined) {
+      const stepVal = Number(datarefs[widget.step_toggle_dataref]);
+      const stepToggleBtn = card.querySelector(".knob-step-toggle");
+      if (stepToggleBtn) {
+        stepToggleBtn.classList.toggle("active", stepVal >= 0.5);
+        const valSpan = stepToggleBtn.querySelector(".step-val");
+        if (valSpan) valSpan.textContent = stepVal >= 0.5 ? "1000" : "100";
+      }
+    }
+
+    // If widget is BARO with STD and inHg/hPa controls
+    const isBaro = widget.cmd_push === "AirbusFBW/BaroStdCapt" || widget.push_label === "STD";
+    if (isBaro) {
+      const stdVal = datarefs["AirbusFBW/BaroStdCapt"] ?? (widget.secondary_dataref ? datarefs[widget.secondary_dataref] : undefined);
+      const isStd = stdVal !== undefined && Number(stdVal) >= 0.5;
+
+      const stdBtn = card.querySelector(".baro-std-btn");
+      if (stdBtn) {
+        stdBtn.classList.toggle("active", isStd);
+      }
+
+      const unitVal = datarefs["AirbusFBW/BaroUnitCapt"];
+      const isUnitInHg = unitVal !== undefined && Number(unitVal) >= 0.5;
+      const unitBtn = card.querySelector(".baro-unit-btn");
+      if (unitBtn) {
+        const capVal = unitBtn.querySelector(".cap-val") || unitBtn;
+        capVal.textContent = isUnitInHg ? "inHg" : "hPa";
+        unitBtn.classList.toggle("active", isUnitInHg);
+      }
+
+      const lcd = card.querySelector(".knob-lcd");
+      if (lcd) {
+        if (isStd) {
+          lcd.textContent = "Std";
+        } else if (val !== undefined && val !== null) {
+          const rawInHg = Number(val);
+          if (isUnitInHg) {
+            lcd.textContent = `${rawInHg.toFixed(2)} in`;
+          } else {
+            const hpa = Math.round(rawInHg * 33.86389);
+            lcd.textContent = `${hpa} hPa`;
+          }
+        }
+      }
+    }
   } else if (widget.type === "selector3") {
     const val = primaryRaw ?? (widget.write_dataref ? datarefs[widget.write_dataref] : undefined);
     if (val !== undefined) {

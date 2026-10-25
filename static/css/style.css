@@ -455,6 +455,158 @@ body {
   box-shadow: 0 0 12px var(--w-accent), 0 0 22px var(--w-glow);
 }
 
+/* Active View Illumination (Radio-button state) */
+.widget-button.is-active-view {
+  border-color: var(--w-accent) !important;
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.7), 0 0 16px var(--w-glow) !important;
+  background: linear-gradient(145deg, #162438 0%, #0d1726 100%) !important;
+}
+
+.widget-button.is-active-view .btn-led-bar {
+  opacity: 1 !important;
+  background: var(--w-accent) !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 14px var(--w-accent), 0 0 24px var(--w-glow) !important;
+}
+
+.widget-button.is-active-view .btn-label {
+  color: #ffffff !important;
+  text-shadow: 0 0 10px var(--w-glow), 0 1px 3px #000000 !important;
+}
+
+/* Memorize Active Feedback & Flash */
+.widget-view-button.memorizing-active {
+  border-color: #ff3344 !important;
+  box-shadow: inset 0 0 20px rgba(255, 50, 50, 0.6), 0 0 20px rgba(255, 50, 50, 0.9) !important;
+  animation: pulse-memorize 0.25s infinite alternate;
+}
+
+@keyframes pulse-memorize {
+  0% { transform: scale(0.97); }
+  100% { transform: scale(1.0); }
+}
+
+.widget-view-button.flash-saved {
+  border-color: #00ffaa !important;
+  background: linear-gradient(145deg, #053b28 0%, #022015 100%) !important;
+  box-shadow: 0 0 24px #00ffaa !important;
+}
+
+/* View Button Header: Slot badge + REC indicator + Edit trigger */
+.view-btn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 3px 6px 1px 6px;
+  gap: 4px;
+}
+
+.view-slot-badge {
+  font-family: var(--font-lcd);
+  font-size: clamp(0.58rem, 0.9vw, 0.72rem);
+  font-weight: 800;
+  color: var(--w-accent);
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+.view-mem-hint {
+  font-family: var(--font-lcd);
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #ff4d6d;
+  background: rgba(255, 77, 109, 0.15);
+  border: 1px solid rgba(255, 77, 109, 0.35);
+  padding: 1px 3px;
+  border-radius: 3px;
+  margin-left: auto;
+  letter-spacing: 0.05em;
+}
+
+.view-edit-trigger {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1;
+  padding: 1px 3px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s, transform 0.1s;
+}
+
+.view-edit-trigger:hover {
+  opacity: 1;
+  color: var(--w-accent);
+  transform: scale(1.15);
+}
+
+/* Inline Live Rename Overlay */
+.view-inline-edit-wrap {
+  position: absolute;
+  inset: 4px;
+  background: #090f19;
+  border: 1.5px solid var(--w-accent);
+  border-radius: 8px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.9), 0 0 10px var(--w-glow);
+}
+
+.view-inline-input {
+  width: 94%;
+  background: #142032;
+  border: 1px solid var(--border-highlight);
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: var(--font-lcd);
+  font-size: clamp(0.72rem, 1.1vw, 0.85rem);
+  font-weight: 800;
+  text-align: center;
+  padding: 4px 6px;
+  outline: none;
+}
+
+.view-inline-input:focus {
+  border-color: var(--w-accent);
+  box-shadow: 0 0 8px var(--w-glow);
+}
+
+.view-inline-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.view-inline-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.view-inline-btn:active {
+  transform: scale(0.92);
+}
+
+.view-inline-save {
+  background: #00b86b;
+  color: #ffffff;
+}
+
+.view-inline-cancel {
+  background: #3a4b60;
+  color: #cbd5e1;
+}
+
 .btn-body {
   display: flex;
   flex-direction: column;
@@ -727,6 +879,60 @@ body {
   border: 1.5px solid var(--led-amber);
   color: var(--led-amber);
   box-shadow: 0 0 8px rgba(255, 171, 0, 0.25);
+}
+
+.knob-cap-btn.baro-std-btn.active {
+  background: linear-gradient(180deg, #073b20 0%, #031f10 100%);
+  border: 1.5px solid var(--led-green);
+  color: #ffffff;
+  text-shadow: 0 0 6px var(--led-green-glow);
+  box-shadow: 0 0 10px var(--led-green-glow);
+}
+
+.knob-cap-btn.baro-std-btn:not(.active) {
+  background: linear-gradient(180deg, #1b2536 0%, #101722 100%);
+  border: 1.5px solid var(--w-border);
+  color: var(--w-subtext);
+  box-shadow: none;
+}
+
+.knob-cap-btn.baro-unit-btn {
+  background: linear-gradient(180deg, #16293d 0%, #0d1824 100%);
+  border: 1.5px solid var(--w-accent);
+  color: var(--w-accent);
+}
+
+.knob-step-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #1b2536 0%, #101722 100%);
+  border: 1.5px solid var(--w-border);
+  color: var(--w-subtext);
+  font-family: var(--font-lcd);
+  font-size: clamp(0.58rem, 0.9vw, 0.7rem);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.knob-step-toggle:hover {
+  border-color: var(--w-accent);
+  color: #ffffff;
+}
+
+.knob-step-toggle:active {
+  transform: scale(0.95);
+}
+
+.knob-step-toggle.active {
+  border-color: var(--led-amber);
+  background: linear-gradient(180deg, #3d2605 0%, #1f1302 100%);
+  color: #ffd54f;
+  box-shadow: 0 0 8px rgba(255, 171, 0, 0.4);
 }
 
 .knob-cap-btn:active,

@@ -26,6 +26,10 @@ class WidgetConfig(BaseModel):
     command: Optional[str] = Field(
         None, description="X-Plane CMND path to trigger on press"
     )
+    cmd_mem: Optional[str] = Field(
+        None,
+        description="Optional command sent on long-press to memorize state (e.g. view quick_look_X_mem)",
+    )
     write_dataref: Optional[str] = Field(
         None, description="X-Plane DREF path to write or toggle"
     )
@@ -39,6 +43,10 @@ class WidgetConfig(BaseModel):
     secondary_dataref: Optional[str] = Field(
         None,
         description="Optional second RREF path (e.g., standby frequency or target value)",
+    )
+    step_toggle_dataref: Optional[str] = Field(
+        None,
+        description="Optional dataref toggled by step selector badge on knob (e.g. 100/1000 ft)",
     )
     led_threshold: float = Field(
         0.5, description="Threshold above which the status LED illuminates"

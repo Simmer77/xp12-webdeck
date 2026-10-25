@@ -5,6 +5,62 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
 
 ---
 
+## [v1.2.0-alpha] — 2026-10-25
+
+### 🇬🇧 English
+- **Universal Camera Views Tab (`Viste`) across all aircraft profiles (`A319`, `E55P`, `B738`, `DEFAULT`)**:
+  - Full 32-button cockpit deck ($8 \times 4$ grid) cleanly split into two halves:
+    - **16 Internal Views** on the left half (Quick Look 0–15): cockpit seats, instruments, FCU/MCP, pedestal, overhead, cabin, and window views.
+    - **16 External Views** on the right half: Chase, Circle 360°, Linear Spot, Still Spot, Ride Along, Tower, Runway, Free Cam, Forward Clean, HUD, Wingman, Cinema, plus 4 custom memorizable external view slots (Quick Look 16–19).
+  - **Live In-Place Label Renaming**: Click the pencil icon `✎` or double-tap any view button to edit the label directly inline; pressing `Enter` or the checkmark saves it immediately to the profile JSON on disk.
+  - **Active View Illumination**: Radio-button visual feedback that illuminates the currently selected camera view with a vibrant accent glow and active LED bar.
+  - **Direct View Memorization (`cmd_mem`)**: Press and hold any view button for ~750 ms to memorize the current camera position without needing keyboard shortcuts, accompanied by cockpit audio chimes and visual feedback.
+- **Complete ToLiss A319 Profile Rework**:
+  - **FCU & EFIS Tab**:
+    - Half-height knobs (`row_span: 1`) stacked symmetrically.
+    - Custom **BARO** knob with integrated `STD` (QNH/Standard toggle) and `inHg/hPa` unit selection buttons, featuring dynamic LCD readout (`Std`, `1013 hPa`, or `29.92 in`).
+    - Integrated 100/1000 ft altitude step toggle directly inside the **ALTITUDE** knob header (`step_toggle_dataref`), adjusting altitude step dynamically.
+    - Integrated EFIS navigation display filters (`CSTR`, `WPT`, `VOR.D`, `NDB`, `ARPT`, `TERR`), Master Warning, Master Caution, and Sidestick Disconnect.
+    - Integrated horizontal detented levers for **ND MODE** (LS, VOR, NAV, ARC, PLAN) and **ND RANGE** (10–320 NM).
+  - **Pedestal Tab**:
+    - Symmetrical hardware layout with Auto Brk (`LO`, `MED`, `MAX`), `T.O CONFIG`, `CHRONO` (with active green illumination), `GEAR`, `PARK BRAKE`, and compact 1×1 `XPDR`.
+    - Symmetrical levers: 4-position `SPEEDBRAKE` (ARM, RET, 1/2, FULL), 2-position `ENG 1 / ENG 2` Master switches, 3-position `ENG MODE` rotary selector (CRANK, NORM, IGN/START), and 5-position `FLAPS` lever.
+  - **Overhead Tab**:
+    - Converted all exterior and cabin lighting controls to realistic 2-position and 3-position toggle switches.
+    - Fixed `EXT PWR` dataref binding (`AirbusFBW/ExtPowOHPArray[0]`) to correctly reflect disconnect state in flight.
+    - Dedicated pushbuttons for BAT 1/2, APU Master/Start/Bleed, Anti-Ice, and Probe Heat.
+- **Core Architecture Enhancements**:
+  - Added `cmd_mem` and `step_toggle_dataref` fields to `WidgetConfig` with automatic RREF subscription handling.
+  - Added `actions.saveWidgetLabel` for real-time live persisting of widget labels.
+
+### 🇮🇹 Italiano
+- **Nuova Tab Universale "Viste" per tutti i profili aereo (`A319`, `E55P`, `B738`, `DEFAULT`)**:
+  - Plancia completa da 32 pulsanti (griglia $8 \times 4$) divisa perfettamente a metà:
+    - **16 Viste Interne** sulla metà sinistra (Quick Look 0–15): postazioni pilota, strumenti, FCU/MCP, pedestal, overhead, cabina passeggeri e oblò.
+    - **16 Viste Esterne** sulla metà destra: Chase, Orbita 360°, Spot lineare, Spot fisso, Ride Along ala/motore, Torre, Pista, Camera libera, Prua pulita, HUD, Wingman, Cinema, più 4 slot esterni personalizzati memorizzabili (Quick Look 16–19).
+  - **Rinominazione Live dell'Etichetta**: Facendo clic sull'icona matita `✎` o con un doppio tocco, l'etichetta diventa un campo modificabile al volo; premendo `Invio` o la spunta verde il nome viene salvato direttamente nel file JSON del profilo su disco.
+  - **Retroilluminazione della Vista Attiva**: Comportamento stile radio button: la vista correntemente selezionata si accende con una spia LED e bagliore neon, spegnendo le altre.
+  - **Memorizzazione Diretta dal WebDeck (`cmd_mem`)**: Pressione prolungata per ~750 ms per memorizzare la posizione della telecamera senza toccare la tastiera, con segnali acustici cockpit e notifica a schermo.
+- **Riprogettazione Completa Profilo ToLiss A319**:
+  - **Pannello FCU & EFIS**:
+    - Knob dimezzati in altezza (`row_span: 1`) accoppiati verticalmente.
+    - Nuovo knob **BARO** con pulsanti integrati `STD` e `inHg/hPa` e lettura dinamica sul display LCD (`Std`, `1013 hPa` o `29.92 in`).
+    - Selettore passo quota 100/1000 ft integrato direttamente nell'header del knob **ALTITUDE** (`step_toggle_dataref`), che adatta al volo il passo del knob.
+    - Inclusi filtri EFIS ND (`CSTR`, `WPT`, `VOR.D`, `NDB`, `ARPT`, `TERR`), Master Warning, Master Caution e disconnessione rapida sidestick.
+    - Selettori a slitta a scatti per **ND MODE** (LS, VOR, NAV, ARC, PLAN) e **ND RANGE** (10–320 NM).
+  - **Pannello Pedestal**:
+    - Layout hardware simmetrico con Auto Brk (`LO`, `MED`, `MAX`), `T.O CONFIG`, `CHRONO` (con illuminazione verde attiva), `GEAR`, `PARK BRAKE` e `XPDR` 1×1.
+    - Leve simmetriche: `SPEEDBRAKE` a 4 posizioni (ARM, RET, 1/2, FULL), switch master `ENG 1 / ENG 2`, selettore rotativo a 3 posizioni `ENG MODE` (CRANK, NORM, IGN/START) e leva `FLAPS` a 5 posizioni.
+  - **Pannello Overhead**:
+    - Switch luci esterne e cabina convertiti in switch a 2 e 3 posizioni realistici.
+    - Risolto il problema del pulsante `EXT PWR` in volo con dataref corretta (`AirbusFBW/ExtPowOHPArray[0]`).
+    - Pulsanti per BAT 1/2, APU, Anti-Ice e Probe Heat.
+- **Miglioramenti Architetturali**:
+  - Aggiunti i campi `cmd_mem` e `step_toggle_dataref` al modello `WidgetConfig` con gestione automatica RREF.
+  - Aggiunta funzione `actions.saveWidgetLabel` per la persistenza live delle etichette nel profilo attivo.
+
+---
+
 ## [v1.1.0-alpha] — 2026-10-25
 
 ### 🇬🇧 English

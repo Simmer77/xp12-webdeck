@@ -406,10 +406,29 @@ class WebDeckApp {
 
     const widgetActions = {
       isEditMode: this.editMode,
+      activeTabId: tab.id,
       sendCommand: (cmd) => this.sendCommand(cmd),
       writeDataref: (dref, val) => this.writeDataref(dref, val),
       getDatarefValue: (dref) => (dref ? this.datarefs[dref] : undefined),
       onEditWidget: (w) => this.editor.openWidgetModal(w),
+      showToast: (msg) => this.showToast(msg),
+      saveWidgetLabel: async (widgetId, newLabel) => {
+        if (!this.activeProfile) return;
+        let found = false;
+        for (const t of this.activeProfile.tabs) {
+          for (const w of t.widgets) {
+            if (w.id === widgetId) {
+              w.label = newLabel;
+              found = true;
+              break;
+            }
+          }
+          if (found) break;
+        }
+        if (found) {
+          await this.saveCurrentProfile(`Etichetta salvata: "${newLabel}"`);
+        }
+      },
     };
 
     for (const widget of tab.widgets || []) {
@@ -425,6 +444,9 @@ class WebDeckApp {
       }
 
       const el = createWidgetElement(widget, widgetActions);
+      if (window._activeViewId && widget.id === window._activeViewId) {
+        el.classList.add("is-active-view");
+      }
       gridEl.appendChild(el);
       this.mountedWidgets.set(widget.id, { element: el, config: widget });
       updateWidgetTelemetry(el, widget, this.datarefs);

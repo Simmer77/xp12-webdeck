@@ -131,7 +131,16 @@ def extract_profile_datarefs(profile: AircraftProfile) -> Dict[str, int]:
     for tab in profile.tabs:
         for w in tab.widgets:
             freq = max(1, min(w.freq_hz, 30))
-            for candidate in (w.status_dataref, w.secondary_dataref, w.write_dataref):
+            candidates = [
+                w.status_dataref,
+                w.secondary_dataref,
+                w.write_dataref,
+                getattr(w, "step_toggle_dataref", None),
+            ]
+            for cmd in (w.cmd_push, w.cmd_pull):
+                if cmd in ("AirbusFBW/BaroStdCapt", "AirbusFBW/BaroUnitCapt", "AirbusFBW/ALT100_1000"):
+                    candidates.append(cmd)
+            for candidate in candidates:
                 if candidate and candidate.strip():
                     key = candidate.strip()
                     drefs[key] = max(drefs.get(key, 0), freq)

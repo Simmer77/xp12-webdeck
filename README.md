@@ -1,6 +1,6 @@
 # ✈️ XP12 WebDeck
 
-![Version](https://img.shields.io/badge/version-v0.1.0--alpha-orange)
+![Version](https://img.shields.io/badge/version-v1.2.0--alpha-orange)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows%20%7C%20macOS-1793d1)
 ![Simulator](https://img.shields.io/badge/simulator-X--Plane%2012-blue)
 ![Python](https://img.shields.io/badge/backend-FastAPI%20%7C%20Asyncio-009688?logo=fastapi&logoColor=white)
