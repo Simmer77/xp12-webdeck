@@ -5,6 +5,26 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
 
 ---
 
+## [v1.1.0-alpha] — 2026-10-25
+
+### 🇬🇧 English
+- **Endless encoders**: 3-column layout (360° wheel, double-height `PUSH` / `PULL`, 4 step buttons on the sides); half-height knobs so HDG/CRS, SPD/BARO, ALT/VS can be stacked.
+- **SPD/MACH** fix: reads Mach correctly (`M 0.74`) with Mach-sized steps.
+- **GFC700 tab**: reordered buttons (FD, NAV, HDG, AP, YD, ALT, VNV, VS, FLC, APR, BANK, CSC, CPL), new CRS knob, compact **XPDR** square (4-digit squawk + STBY/ON).
+- **Pedestal tab** (half-height layout): ENG 1/2, SPEED BRAKE, GEAR (2-pos switch), FLAPS (5-pos switch), PARK BRAKE; new HYD PUMP 1/2, FUEL PUMP 1/2 (3-pos), PRESS MODE and **ECS** 4-position knob (new `selector4` widget).
+- Switches now support 4-5 positions; compact `half-row` styles for selectors, switches and levers.
+- Removed the *GCU 477 & Synoptics* tab (to be redesigned).
+
+### 🇮🇹 Italiano
+- **Encoder continui**: layout a 3 colonne (ghiera 360°, `PUSH` / `PULL` a doppia altezza, 4 tasti di passo ai lati); knob a mezza altezza per impilare HDG/CRS, SPD/BARO, ALT/VS.
+- **SPD/MACH**: lettura corretta del Mach (`M 0.74`) con passi adatti.
+- **Tab GFC700**: bottoni riordinati (FD, NAV, HDG, AP, YD, ALT, VNV, VS, FLC, APR, BANK, CSC, CPL), nuovo knob CRS, quadrato **XPDR** compatto (squawk a 4 cifre + STBY/ON).
+- **Tab Pedestal** (altezza dimezzata): ENG 1/2, SPEED BRAKE, GEAR (switch 2 pos), FLAPS (switch 5 pos), PARK BRAKE; nuovi HYD PUMP 1/2, FUEL PUMP 1/2 (3 pos), PRESS MODE e knob **ECS** a 4 posizioni (nuovo widget `selector4`).
+- Gli switch supportano 4-5 posizioni; stili compatti `half-row` per selettori, switch e leve.
+- Rimossa la tab *GCU 477 & Synoptics* (da riprogettare).
+
+---
+
 ## [v1.0.0-alpha] — 2026-10-25 (`alpha 1.0.0`)
 
 ### 🇬🇧 English

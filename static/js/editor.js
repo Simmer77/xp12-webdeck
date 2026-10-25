@@ -93,7 +93,7 @@ export class VisualEditor {
     const secSel3 = document.getElementById("section-selector3");
     const secBounds = document.getElementById("section-bounds");
 
-    const isThreePos = widgetType === "selector3" || widgetType === "switch3" || widgetType === "switch2";
+    const isThreePos = widgetType === "selector3" || widgetType === "selector4" || widgetType === "switch3" || widgetType === "switch2";
     secButton.classList.toggle("hidden", widgetType !== "button");
     secKnob.classList.toggle("hidden", widgetType !== "knob" && !isThreePos && widgetType !== "gear");
     if (secSel3) secSel3.classList.toggle("hidden", !isThreePos);

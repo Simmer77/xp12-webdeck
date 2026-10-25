@@ -106,12 +106,24 @@ export function createWidgetElement(widget, actions) {
   card.style.gridRow = `${widget.row + 1} / span ${widget.row_span || 1}`;
   card.style.gridColumn = `${widget.col + 1} / span ${widget.col_span || 1}`;
 
+  // Half-height (1 row) compact layout for selectors, switches, gear lever and detented levers
+  if (
+    Number(widget.row_span || 1) === 1 &&
+    !widget.secondary_dataref &&
+    ["selector3", "selector4", "switch3", "switch2", "gear", "slider"].includes(widget.type)
+  ) {
+    card.classList.add("half-row");
+  }
+
   if (widget.type === "button") {
     buildButtonWidget(card, widget, actions);
   } else if (widget.type === "knob") {
     buildKnobWidget(card, widget, actions);
   } else if (widget.type === "selector3") {
     buildSelector3Widget(card, widget, actions);
+  } else if (widget.type === "selector4") {
+    card.classList.add("widget-selector3");
+    buildSelector4Widget(card, widget, actions);
   } else if (widget.type === "switch3" || widget.type === "switch2") {
     buildSwitch3Widget(card, widget, actions);
   } else if (widget.type === "gear") {
@@ -438,6 +450,9 @@ function buildKnobWidget(card, widget, actions) {
 
   if (Number(widget.col_span || 1) === 1) {
     card.classList.add("knob-compact-col");
+  }
+  if (Number(widget.row_span || 1) === 1) {
+    card.classList.add("knob-half-row");
   }
 
   // 1. Top Header: Title on left + Live Digital LCD Readout on right
@@ -1118,7 +1133,242 @@ function updateSelector3Visuals(card, widget, activeIdx) {
 /* 2C. VERTICAL TOGGLE SWITCH (2-POS OFF/ON & 3-POS OFF/TAXI/LDG)            */
 /* ========================================================================= */
 
+/* ========================================================================= */
+/* 2B-bis. 4-POSITION COCKPIT ROTARY SELECTOR (e.g. ECS: OFF / 1 / BOTH / 2)  */
+/* Clock positions: 7 o'clock (OFF), 11 (1), 12 (BOTH), 1 (2)                 */
+/* ========================================================================= */
+
+const SELECTOR4_ANGLES = [-150, -30, 0, 30];
+const SELECTOR4_DEFAULT_LABELS = ["OFF", "1", "BOTH", "2"];
+
+function getSelector4Labels(widget) {
+  const raw = Array.isArray(widget.pos_labels) && widget.pos_labels.length >= 4
+    ? widget.pos_labels
+    : SELECTOR4_DEFAULT_LABELS;
+  return SELECTOR4_DEFAULT_LABELS.map((def, i) => String(raw[i] || def));
+}
+
+function getSelector4Values(widget) {
+  const raw = Array.isArray(widget.pos_values) && widget.pos_values.length >= 4
+    ? widget.pos_values
+    : [0.0, 1.0, 2.0, 3.0];
+  return [0, 1, 2, 3].map((i) => Number(raw[i] ?? i));
+}
+
+function resolveSelector4Index(rawVal, widget) {
+  const vals = getSelector4Values(widget);
+  if (rawVal === undefined || rawVal === null || Number.isNaN(Number(rawVal))) {
+    return 0;
+  }
+  const num = Number(rawVal);
+  let bestIdx = 0;
+  let bestDist = Math.abs(num - vals[0]);
+  for (let i = 1; i < 4; i++) {
+    const d = Math.abs(num - vals[i]);
+    if (d < bestDist) {
+      bestDist = d;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
+}
+
+function buildSelector4SvgMarkup(labels) {
+  return `
+    <svg class="selector3-svg selector4-svg" viewBox="0 0 140 112" aria-hidden="true">
+      <defs>
+        <radialGradient id="sel4BezelGrad" cx="50%" cy="38%" r="65%">
+          <stop offset="0%" stop-color="#32435b" />
+          <stop offset="100%" stop-color="#0f1621" />
+        </radialGradient>
+        <linearGradient id="sel4PointerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#d8e3f2" />
+          <stop offset="50%" stop-color="#ffffff" />
+          <stop offset="100%" stop-color="#b5c6de" />
+        </linearGradient>
+      </defs>
+      <!-- Detent ticks: 7 o'clock, 11 o'clock, 12 o'clock, 1 o'clock -->
+      <line x1="53.5" y1="90.6" x2="50" y2="96.6" stroke="#9fb2cc" stroke-width="2.5" stroke-linecap="round" />
+      <line x1="53.5" y1="33.4" x2="50" y2="27.4" stroke="#9fb2cc" stroke-width="2.5" stroke-linecap="round" />
+      <line x1="70" y1="29" x2="70" y2="22" stroke="#9fb2cc" stroke-width="2.5" stroke-linecap="round" />
+      <line x1="86.5" y1="33.4" x2="90" y2="27.4" stroke="#9fb2cc" stroke-width="2.5" stroke-linecap="round" />
+      <!-- Position labels -->
+      <text class="sel3-svg-lbl lbl-0" x="46" y="107" text-anchor="middle" font-family="monospace" font-size="9.5" font-weight="800">${escapeHtml(labels[0])}</text>
+      <text class="sel3-svg-lbl lbl-1" x="44" y="24" text-anchor="middle" font-family="monospace" font-size="9.5" font-weight="800">${escapeHtml(labels[1])}</text>
+      <text class="sel3-svg-lbl lbl-2" x="70" y="14" text-anchor="middle" font-family="monospace" font-size="9.5" font-weight="800">${escapeHtml(labels[2])}</text>
+      <text class="sel3-svg-lbl lbl-3" x="96" y="24" text-anchor="middle" font-family="monospace" font-size="9.5" font-weight="800">${escapeHtml(labels[3])}</text>
+      <!-- Bezel -->
+      <circle cx="70" cy="62" r="30" fill="url(#sel4BezelGrad)" stroke="#435672" stroke-width="2.2" />
+      <!-- Rotating pointer bar -->
+      <g class="selector4-rotor-group" style="transform-origin: 70px 62px; transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);">
+        <rect x="64" y="36" width="12" height="52" rx="6" fill="#1e2a3a" stroke="#597091" stroke-width="1.8" />
+        <polygon points="70,31 65,44 75,44" fill="url(#sel4PointerGrad)" />
+        <line x1="70" y1="36" x2="70" y2="50" stroke="var(--w-accent)" stroke-width="3.2" stroke-linecap="round" />
+      </g>
+      <circle cx="70" cy="62" r="12" fill="#0b1017" stroke="#33465f" stroke-width="1.5" />
+      <text class="selector3-state-text" x="70" y="65.5" text-anchor="middle" fill="var(--w-accent)" font-family="monospace" font-size="7.5" font-weight="800">${escapeHtml(labels[0])}</text>
+    </svg>
+  `;
+}
+
+function updateSelector4Visuals(card, widget, activeIdx) {
+  const labels = getSelector4Labels(widget);
+  const clamped = Math.max(0, Math.min(3, activeIdx));
+
+  const rotor = card.querySelector(".selector4-rotor-group");
+  if (rotor) {
+    rotor.style.transform = `rotate(${SELECTOR4_ANGLES[clamped]}deg)`;
+  }
+  const stateText = card.querySelector(".selector3-state-text");
+  if (stateText) stateText.textContent = labels[clamped];
+
+  for (let i = 0; i < 4; i++) {
+    const svgLbl = card.querySelector(`.sel3-svg-lbl.lbl-${i}`);
+    if (svgLbl) svgLbl.classList.toggle("active", i === clamped);
+    const btn = card.querySelector(`.selector3-pos-btn.pos-${i}`);
+    if (btn) btn.classList.toggle("active", i === clamped);
+  }
+}
+
+function buildSelector4Widget(card, widget, actions) {
+  const labels = getSelector4Labels(widget);
+  const values = getSelector4Values(widget);
+
+  const header = document.createElement("div");
+  header.className = "knob-header";
+  header.innerHTML = `
+    <div class="knob-title-wrap">
+      <span class="knob-title">${escapeHtml(widget.label)}</span>
+      ${widget.sublabel ? `<span class="knob-subtitle">${escapeHtml(widget.sublabel)}</span>` : ""}
+    </div>
+  `;
+  card.appendChild(header);
+
+  const dialWrap = document.createElement("div");
+  dialWrap.className = "selector3-dial-wrap";
+  dialWrap.title = labels.join(" • ");
+  dialWrap.innerHTML = buildSelector4SvgMarkup(labels);
+  card.appendChild(dialWrap);
+
+  const btnBar = document.createElement("div");
+  btnBar.className = "selector3-btn-bar selector4-btn-bar";
+  const posBtns = labels.map((lbl, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `selector3-pos-btn pos-${idx}`;
+    btn.textContent = lbl;
+    btnBar.appendChild(btn);
+    return btn;
+  });
+  card.appendChild(btnBar);
+
+  const initialRaw = actions.getDatarefValue(widget.status_dataref || widget.write_dataref);
+  let currentIdx = resolveSelector4Index(initialRaw, widget);
+  card.dataset.selectorIdx = String(currentIdx);
+  updateSelector4Visuals(card, widget, currentIdx);
+
+  if (actions.isEditMode) return;
+
+  const selectPosition = (targetIdx) => {
+    const target = Math.max(0, Math.min(3, targetIdx));
+    const liveRaw = actions.getDatarefValue(widget.status_dataref || widget.write_dataref);
+    const liveIdx = liveRaw !== undefined
+      ? resolveSelector4Index(liveRaw, widget)
+      : Number(card.dataset.selectorIdx ?? currentIdx);
+
+    playCockpitTick(700 + target * 160, 14);
+
+    const diff = target - liveIdx;
+    if (diff > 0 && widget.cmd_inc_fine) {
+      for (let i = 0; i < diff; i++) actions.sendCommand(widget.cmd_inc_fine);
+    } else if (diff < 0 && widget.cmd_dec_fine) {
+      for (let i = 0; i < Math.abs(diff); i++) actions.sendCommand(widget.cmd_dec_fine);
+    }
+
+    if (widget.write_dataref) {
+      actions.writeDataref(widget.write_dataref, values[target]);
+    }
+
+    currentIdx = target;
+    card.dataset.selectorIdx = String(target);
+    updateSelector4Visuals(card, widget, target);
+  };
+
+  posBtns.forEach((btn, idx) => {
+    btn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectPosition(idx);
+    });
+  });
+
+  // Dial: tap nearest clock position, or swipe left/right to step
+  let startX = 0;
+  let hasDragged = false;
+
+  dialWrap.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    dialWrap.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    hasDragged = false;
+  });
+
+  dialWrap.addEventListener("pointermove", (e) => {
+    if (!dialWrap.hasPointerCapture(e.pointerId)) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 22) {
+      hasDragged = true;
+      const cur = Number(card.dataset.selectorIdx ?? currentIdx);
+      selectPosition(cur + (dx > 0 ? 1 : -1));
+      startX = e.clientX;
+    }
+  });
+
+  const endDial = (e) => {
+    if (dialWrap.hasPointerCapture(e.pointerId)) {
+      dialWrap.releasePointerCapture(e.pointerId);
+    }
+    if (!hasDragged && e.type === "pointerup") {
+      const svg = dialWrap.querySelector("svg");
+      const rect = (svg || dialWrap).getBoundingClientRect();
+      // Dial center in viewBox (70, 62) of 140x112
+      const cx = rect.left + rect.width * (70 / 140);
+      const cy = rect.top + rect.height * (62 / 112);
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
+      let best = 0;
+      let bestDiff = Infinity;
+      SELECTOR4_ANGLES.forEach((a, i) => {
+        const d = Math.abs(angle - a);
+        if (d < bestDiff) {
+          bestDiff = d;
+          best = i;
+        }
+      });
+      selectPosition(best);
+    }
+  };
+
+  dialWrap.addEventListener("pointerup", endDial);
+  dialWrap.addEventListener("pointercancel", endDial);
+}
+
 function getSwitchConfig(widget) {
+  // Multi-position lever (4-5 detents, e.g. FLAPS 0/1/2/3/FULL): idx 0 = bottom, last = top
+  if (Array.isArray(widget.pos_labels) && widget.pos_labels.length >= 4) {
+    const n = Math.min(5, widget.pos_labels.length);
+    const offsets = n === 4 ? [26, 9, -9, -26] : [26, 13, 0, -13, -26];
+    return {
+      count: n,
+      labels: widget.pos_labels.slice(0, n).map((l, i) => String(l || i)),
+      values: Array.from({ length: n }, (_, i) =>
+        Number(Array.isArray(widget.pos_values) ? widget.pos_values[i] ?? i : i)
+      ),
+      yOffsets: offsets,
+    };
+  }
+
   const isTwoPos =
     widget.type === "switch2" ||
     (Array.isArray(widget.pos_labels) && widget.pos_labels.length === 2);
@@ -1166,7 +1416,7 @@ function resolveSwitchIndex(rawVal, widget) {
   let bestDist = Math.abs(num - values[0]);
   for (let i = 1; i < count; i++) {
     const d = Math.abs(num - values[i]);
-    if (d < bestDist) {
+    if (d <= bestDist) {
       bestDist = d;
       bestIdx = i;
     }
@@ -1176,52 +1426,79 @@ function resolveSwitchIndex(rawVal, widget) {
 
 function buildSwitch3Widget(card, widget, actions) {
   const { count, labels, values } = getSwitchConfig(widget);
+  const hasSecondaryLcd = Boolean(widget.secondary_dataref);
   card.classList.add("widget-switch3");
   card.classList.toggle("switch-2pos", count === 2);
+  card.classList.toggle("switch-lcd-card", hasSecondaryLcd);
 
   const header = document.createElement("div");
   header.className = "knob-header";
   header.innerHTML = `
     <div class="knob-title-wrap">
       <span class="knob-title">${escapeHtml(widget.label)}</span>
-      ${widget.sublabel ? `<span class="knob-subtitle">${escapeHtml(widget.sublabel)}</span>` : ""}
+      ${widget.sublabel && !hasSecondaryLcd ? `<span class="knob-subtitle">${escapeHtml(widget.sublabel)}</span>` : ""}
     </div>
   `;
   card.appendChild(header);
 
-  const body = document.createElement("div");
-  body.className = "switch3-body";
-
-  // Left: Vertical Toggle Lever SVG
-  const leverWrap = document.createElement("div");
-  leverWrap.className = "switch3-lever-wrap";
-  leverWrap.title =
-    count === 2
-      ? `Su: ${labels[1]} • Giù: ${labels[0]}`
-      : `Su: ${labels[2]} • Centro: ${labels[1]} • Giù: ${labels[0]}`;
-  leverWrap.innerHTML = buildSwitch3SvgMarkup(labels, count);
-  body.appendChild(leverWrap);
-
-  // Right: Stacked Vertical Position Buttons (Top to Bottom)
-  const stackCol = document.createElement("div");
-  stackCol.className = "switch3-stack-col";
-
   const posBtns = new Array(count).fill(null);
-  const topToBottomOrder = count === 2 ? [1, 0] : [2, 1, 0];
+  let leverWrap = null;
 
-  topToBottomOrder.forEach((idx) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    const roleClass = idx === 0 ? "role-off" : idx === count - 1 ? "role-top" : "role-mid";
-    btn.className = `switch3-pos-btn pos-${idx} ${roleClass}`;
-    btn.dataset.posIndex = String(idx);
-    btn.textContent = labels[idx];
-    stackCol.appendChild(btn);
-    posBtns[idx] = btn;
-  });
+  if (hasSecondaryLcd) {
+    // Compact 1x1 Mode (e.g. XPDR): 4-digit LCD window on top + horizontal [STBY] [ON] buttons below (no lever)
+    const lcdBox = document.createElement("div");
+    lcdBox.className = "switch-lcd-box";
+    const secVal = actions.getDatarefValue(widget.secondary_dataref);
+    lcdBox.innerHTML = `<span class="switch-lcd-val">${formatReadoutValue(secVal, widget)}</span>`;
+    card.appendChild(lcdBox);
 
-  body.appendChild(stackCol);
-  card.appendChild(body);
+    const btnRow = document.createElement("div");
+    btnRow.className = "switch-lcd-btn-row";
+    for (let idx = 0; idx < count; idx++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      const roleClass = idx === 0 ? "role-off" : idx === count - 1 ? "role-top" : "role-mid";
+      btn.className = `switch3-pos-btn pos-${idx} ${roleClass}`;
+      btn.dataset.posIndex = String(idx);
+      btn.textContent = labels[idx];
+      btnRow.appendChild(btn);
+      posBtns[idx] = btn;
+    }
+    card.appendChild(btnRow);
+  } else {
+    const body = document.createElement("div");
+    body.className = "switch3-body";
+
+    // Left: Vertical Toggle Lever SVG
+    leverWrap = document.createElement("div");
+    leverWrap.className = "switch3-lever-wrap";
+    leverWrap.title =
+      count === 2
+        ? `Su: ${labels[1]} • Giù: ${labels[0]}`
+        : `Su: ${labels[2]} • Centro: ${labels[1]} • Giù: ${labels[0]}`;
+    leverWrap.innerHTML = buildSwitch3SvgMarkup(labels, count);
+    body.appendChild(leverWrap);
+
+    // Right: Stacked Vertical Position Buttons (Top to Bottom)
+    const stackCol = document.createElement("div");
+    stackCol.className = "switch3-stack-col";
+
+    const topToBottomOrder = Array.from({ length: count }, (_, i) => count - 1 - i);
+
+    topToBottomOrder.forEach((idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      const roleClass = idx === 0 ? "role-off" : idx === count - 1 ? "role-top" : "role-mid";
+      btn.className = `switch3-pos-btn pos-${idx} ${roleClass}`;
+      btn.dataset.posIndex = String(idx);
+      btn.textContent = labels[idx];
+      stackCol.appendChild(btn);
+      posBtns[idx] = btn;
+    });
+
+    body.appendChild(stackCol);
+    card.appendChild(body);
+  }
 
   const initialRaw = actions.getDatarefValue(widget.status_dataref || widget.write_dataref);
   let currentIdx = resolveSwitchIndex(initialRaw, widget);
@@ -1287,6 +1564,8 @@ function buildSwitch3Widget(card, widget, actions) {
     });
   });
 
+  if (!leverWrap) return;
+
   // Vertical swipe or tap on the toggle switch graphic
   let startY = 0;
   let hasDragged = false;
@@ -1321,13 +1600,8 @@ function buildSwitch3Widget(card, widget, actions) {
       } else {
         const rect = leverWrap.getBoundingClientRect();
         const relY = (e.clientY - rect.top) / (rect.height || 1);
-        if (relY < 0.34) {
-          selectSwitchPos(2);
-        } else if (relY > 0.66) {
-          selectSwitchPos(0);
-        } else {
-          selectSwitchPos(1);
-        }
+        const fromTop = Math.max(0, Math.min(count - 1, Math.floor(relY * count)));
+        selectSwitchPos(count - 1 - fromTop);
       }
     }
   };
@@ -1353,6 +1627,7 @@ function buildSwitch3SvgMarkup(labels, count = 3) {
       <!-- Detent Tick Marks -->
       <line x1="5" y1="36" x2="12" y2="36" stroke="#8ea0b8" stroke-width="2.5" stroke-linecap="round" />
       ${count === 3 ? `<line x1="5" y1="62" x2="12" y2="62" stroke="#8ea0b8" stroke-width="2.5" stroke-linecap="round" />` : ""}
+      ${count > 3 ? [26, 13, 0, -13, -26].filter((_, i, arr) => count === 5 || [0, 1, 3, 4].includes(i)).map((o) => `<line x1="5" y1="${62 + o}" x2="12" y2="${62 + o}" stroke="#8ea0b8" stroke-width="2" stroke-linecap="round" />`).join("") : ""}
       <line x1="5" y1="88" x2="12" y2="88" stroke="#8ea0b8" stroke-width="2.5" stroke-linecap="round" />
       <!-- Center Mounting Nut -->
       <circle cx="48" cy="62" r="12" fill="#1e293b" stroke="#7c90ab" stroke-width="2" />
@@ -1872,12 +2147,25 @@ export function updateWidgetTelemetry(card, widget, datarefs) {
       card.dataset.selectorIdx = String(idx);
       updateSelector3Visuals(card, widget, idx);
     }
+  } else if (widget.type === "selector4") {
+    const val = primaryRaw ?? (widget.write_dataref ? datarefs[widget.write_dataref] : undefined);
+    if (val !== undefined) {
+      const idx = resolveSelector4Index(val, widget);
+      card.dataset.selectorIdx = String(idx);
+      updateSelector4Visuals(card, widget, idx);
+    }
   } else if (widget.type === "switch3" || widget.type === "switch2") {
     const val = primaryRaw ?? (widget.write_dataref ? datarefs[widget.write_dataref] : undefined);
     if (val !== undefined) {
       const idx = resolveSwitchIndex(val, widget);
       card.dataset.selectorIdx = String(idx);
       updateSwitch3Visuals(card, widget, idx);
+    }
+    if (widget.secondary_dataref) {
+      const lcdEl = card.querySelector(".switch-lcd-val");
+      if (lcdEl) {
+        lcdEl.textContent = formatReadoutValue(datarefs[widget.secondary_dataref], widget);
+      }
     }
   } else if (widget.type === "gear") {
     const val = primaryRaw ?? (widget.write_dataref ? datarefs[widget.write_dataref] : undefined);

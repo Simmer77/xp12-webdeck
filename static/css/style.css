@@ -670,9 +670,9 @@ body {
 /* Wide PUSH (Top) and PULL (Bottom) Buttons ("grandezza due quadratini") */
 .knob-cap-btn {
   width: 100%;
-  min-height: 25px;
-  padding: 2px 5px;
-  border-radius: 6px;
+  min-height: 44px;
+  padding: 5px 8px;
+  border-radius: 7px;
   font-family: var(--font-lcd);
   cursor: pointer;
   touch-action: none;
@@ -680,39 +680,39 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   white-space: nowrap;
   overflow: hidden;
   transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.12s ease;
 }
 
 .knob-cap-btn .cap-tag {
-  font-size: 0.54rem;
+  font-size: 0.68rem;
   font-weight: 900;
-  letter-spacing: 0.03em;
-  padding: 1px 3px;
-  border-radius: 3px;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 4px;
   background: rgba(0, 0, 0, 0.45);
 }
 
 .knob-cap-btn .cap-val {
-  font-size: clamp(0.62rem, 0.96vw, 0.74rem);
+  font-size: clamp(0.78rem, 1.2vw, 0.96rem);
   font-weight: 900;
   color: #ffffff;
   text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
 }
 
 .knob-compact-col .knob-cap-btn {
-  padding: 2px 3px;
-  gap: 2px;
+  padding: 4px 4px;
+  gap: 3px;
 }
 
 .knob-compact-col .knob-cap-btn .cap-tag {
-  font-size: 0.48rem;
+  font-size: 0.56rem;
 }
 
 .knob-compact-col .knob-cap-btn .cap-val {
-  font-size: 0.56rem;
+  font-size: 0.68rem;
 }
 
 .knob-cap-btn.push-cap {
@@ -772,6 +772,70 @@ body {
 
 .knob-compact-col .knob-pos-btn {
   font-size: clamp(0.58rem, 0.9vw, 0.7rem);
+}
+
+/* Half-Height Knobs (row_span: 1) — Compact vertical proportions for stacked pairs */
+.widget-knob.knob-half-row {
+  padding: 4px 6px;
+  gap: 2px;
+}
+
+.widget-knob.knob-half-row .knob-header {
+  gap: 4px;
+}
+
+.widget-knob.knob-half-row .knob-title {
+  font-size: clamp(0.68rem, 1.04vw, 0.82rem);
+  line-height: 1.05;
+}
+
+.widget-knob.knob-half-row .knob-subtitle {
+  display: none;
+}
+
+.widget-knob.knob-half-row .knob-lcd {
+  padding: 1px 6px;
+  font-size: clamp(0.78rem, 1.22vw, 0.96rem);
+}
+
+.widget-knob.knob-half-row .knob-endless-deck {
+  gap: 5px;
+  grid-template-columns: minmax(44px, 0.92fr) minmax(68px, 1.35fr) minmax(44px, 0.92fr);
+}
+
+.widget-knob.knob-half-row .knob-wing-col {
+  gap: 3px;
+}
+
+.widget-knob.knob-half-row .knob-wing-col .wing-btn {
+  min-height: 22px;
+  font-size: clamp(0.72rem, 1.12vw, 0.88rem);
+}
+
+.widget-knob.knob-half-row .knob-center-col {
+  gap: 2px;
+  justify-content: space-between;
+}
+
+.widget-knob.knob-half-row .knob-endless-svg {
+  max-width: 44px;
+  max-height: 44px;
+}
+
+.widget-knob.knob-half-row .knob-cap-btn {
+  min-height: 32px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  gap: 5px;
+}
+
+.widget-knob.knob-half-row .knob-cap-btn .cap-tag {
+  font-size: 0.6rem;
+  padding: 2px 5px;
+}
+
+.widget-knob.knob-half-row .knob-cap-btn .cap-val {
+  font-size: clamp(0.7rem, 1.08vw, 0.84rem);
 }
 
 /* ========================================================================= */
@@ -1006,6 +1070,52 @@ body {
   box-shadow: 0 0 8px rgba(255, 61, 87, 0.4);
 }
 
+/* Compact 1x1 Switch + LCD Window (e.g. XPDR next to CPL: 4-digit LCD + [STBY] [ON] buttons) */
+.widget-switch3.switch-lcd-card {
+  padding: 5px 6px;
+  gap: 4px;
+}
+
+.switch-lcd-box {
+  flex: 1;
+  min-height: 0;
+  background: var(--bg-lcd);
+  border: 1.5px solid #2b3e58;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.switch-lcd-val {
+  font-family: var(--font-lcd);
+  font-size: clamp(1.05rem, 1.8vw, 1.4rem);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--led-amber);
+  text-shadow: 0 0 10px var(--led-amber-glow);
+}
+
+.widget-switch3.switch-lcd-card.is-active .switch-lcd-val {
+  color: var(--led-green);
+  text-shadow: 0 0 10px var(--led-green-glow);
+}
+
+.switch-lcd-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.switch-lcd-btn-row .switch3-pos-btn {
+  height: 26px;
+  min-height: 24px;
+  font-size: clamp(0.64rem, 1vw, 0.78rem);
+}
+
 /* ========================================================================= */
 /* WIDGET 2D: VERTICAL LANDING GEAR LEVER (UP / DN + 3 GREEN LIGHTS)         */
 /* ========================================================================= */
@@ -1236,11 +1346,11 @@ body {
 
 .widget-slider.detented-lever.vertical .slider-track-area {
   display: grid;
-  grid-template-columns: minmax(64px, 1fr) minmax(70px, 1.15fr);
+  grid-template-columns: minmax(42px, 0.95fr) minmax(44px, 1.05fr);
   align-items: stretch;
   justify-items: center;
-  gap: 8px;
-  padding: 8px 4px;
+  gap: 5px;
+  padding: 6px 2px;
 }
 
 .slider-slot {
@@ -1252,7 +1362,7 @@ body {
 }
 
 .widget-slider.vertical .slider-slot {
-  width: 28px;
+  width: 24px;
   height: 100%;
 }
 
@@ -1263,8 +1373,8 @@ body {
 
 .slider-detent-notch {
   position: absolute;
-  left: -6px;
-  right: -6px;
+  left: -5px;
+  right: -5px;
   height: 2px;
   background: #475569;
   transform: translateY(-50%);
@@ -1307,8 +1417,8 @@ body {
 
 .widget-slider.vertical .slider-thumb {
   left: 50%;
-  width: 58px;
-  height: 24px;
+  width: 46px;
+  height: 22px;
 }
 
 .widget-slider.horizontal .slider-thumb {
@@ -1746,4 +1856,127 @@ body {
   .form-grid-3 {
     grid-template-columns: 1fr;
   }
+}
+
+/* ========================================================================= */
+/* 4-POSITION SELECTOR (ECS: OFF / 1 / BOTH / 2)                             */
+/* ========================================================================= */
+
+.selector4-btn-bar {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.selector3-pos-btn.pos-3.active {
+  border: 1.5px solid var(--led-green);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #073b20 0%, #031f10 100%);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.45);
+}
+
+.widget-selector4 .selector3-pos-btn.pos-2.active {
+  border: 1.5px solid var(--led-amber);
+}
+
+/* ========================================================================= */
+/* HALF-HEIGHT (row_span: 1) COMPACT LAYOUTS                                 */
+/* Selectors, toggle switches, gear lever and detented levers                */
+/* ========================================================================= */
+
+.widget-card.half-row .knob-subtitle {
+  display: none;
+}
+
+.widget-card.half-row .knob-title {
+  font-size: clamp(0.62rem, 0.96vw, 0.76rem);
+}
+
+/* Rotary selectors (ENG 1/2, ECS) */
+.widget-selector3.half-row {
+  padding: 3px 6px;
+  gap: 2px;
+}
+
+.widget-selector3.half-row .selector3-svg {
+  max-height: 100%;
+}
+
+.widget-selector3.half-row .selector3-pos-btn {
+  height: 22px;
+  font-size: clamp(0.6rem, 0.95vw, 0.72rem);
+}
+
+/* Toggle switches (SPEED BRAKE, FUEL PUMP 1/2, ...) */
+.widget-switch3.half-row {
+  padding: 3px 5px;
+  gap: 2px;
+}
+
+.widget-switch3.half-row .switch3-body {
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 3px;
+}
+
+.widget-switch3.half-row .switch3-svg {
+  max-height: 100%;
+}
+
+.widget-switch3.half-row .switch3-stack-col {
+  gap: 2px;
+}
+
+.widget-switch3.half-row .switch3-pos-btn {
+  flex: 1 1 0;
+  min-height: 14px;
+  max-height: none;
+  font-size: clamp(0.56rem, 0.86vw, 0.68rem);
+  padding: 0 2px;
+}
+
+/* Landing gear lever: compact = UP / DN buttons side by side (no track) */
+.widget-gear.half-row {
+  padding: 3px 6px;
+  gap: 3px;
+}
+
+.widget-gear.half-row .gear-track-wrap {
+  display: none;
+}
+
+.widget-gear.half-row .gear-body {
+  flex-direction: row;
+  gap: 4px;
+}
+
+.widget-gear.half-row .gear-pos-btn {
+  flex: 1;
+  height: 100%;
+  min-height: 22px;
+}
+
+/* Flaps / detented vertical lever: compact = detent buttons in one row (no track) */
+.widget-slider.detented-lever.vertical.half-row {
+  padding: 3px 5px;
+  gap: 3px;
+}
+
+.widget-slider.detented-lever.vertical.half-row .slider-track-area {
+  display: flex;
+  padding: 0;
+}
+
+.widget-slider.detented-lever.vertical.half-row .slider-slot {
+  display: none;
+}
+
+.widget-slider.detented-lever.vertical.half-row .slider-detent-col {
+  flex-direction: row;
+  gap: 3px;
+}
+
+.widget-slider.detented-lever.vertical.half-row .slider-detent-btn {
+  min-height: 22px;
+  font-size: clamp(0.58rem, 0.9vw, 0.72rem);
+  padding: 0 1px;
 }

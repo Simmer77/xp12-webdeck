@@ -35,7 +35,7 @@ Designed with a **zero-bloat architecture**, XP12 WebDeck communicates directly 
 | [`DEFAULT.json`](profiles/DEFAULT.json) | `DEFAULT` | **Universal X-Plane 12** | 3 tabs (`8x4`): Universal Autopilot & PFD, Garmin G1000 PFD/MFD + 8.33 kHz Radio Tuning, Systems/Ice/Lights/Trim/Flaps |
 | [`B738.json`](profiles/B738.json) | `B738` | **Boeing 737-800X (Zibo Mod)** | 3 tabs (`8x4`): Native `laminar/B738/*` MCP (`SPD/ALT INTV`, Bank Angle), EFIS Capt + Autobrake + Zibo EFB, Overhead/APU/Engine Start |
 | [`A319.json`](profiles/A319.json) | `A319` | **ToLiss Airbus A319** | 3 tabs (`8x4`): Native `AirbusFBW/*` FCU with Push `[∙]` Managed & Pull Selected, EFIS ND + all 12 ECAM SD pages + Autobrake, Overhead/APU/Pedestal |
-| [`E55P.json`](profiles/E55P.json) | `E55P` | **Aerobask Embraer Phenom 300** | 3 tabs (`8x4`): Native `aerobask/*` GFC700 Autopilot (`CSC`), GCU 477 FMS + Synoptic MFD pages, Overhead/De-Ice/Engine Start |
+| [`E55P.json`](profiles/E55P.json) | `E55P` | **Aerobask Embraer Phenom 300** | 3 tabs (`8x4`): GFC700 Autopilot + XPDR, Elec/Ice/Pedestal (fuel/hyd pumps, ECS, gear, flaps), Lights Panel |
 
 ### 🚀 Quick Start (Linux, macOS & Windows)
 
