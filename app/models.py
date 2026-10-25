@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 
 class WidgetConfig(BaseModel):
     id: str = Field(..., description="Unique widget identifier within the tab")
-    type: Literal["button", "knob", "slider", "display"] = Field(
-        ..., description="Widget interactive type"
+    type: str = Field(
+        "button", description="Widget interactive type: button, knob, selector3, slider, display"
     )
     row: int = Field(0, ge=0, description="0-based grid row index")
     col: int = Field(0, ge=0, description="0-based grid column index")
@@ -82,6 +82,25 @@ class WidgetConfig(BaseModel):
     )
     pull_label: Optional[str] = Field(
         "PULL", description="Short badge label for pull action"
+    )
+
+    # 3-Position Rotary Selector (selector3: e.g., STOP / RUN / START)
+    pos_labels: List[str] = Field(
+        default_factory=lambda: ["STOP", "RUN", "START"],
+        description="Labels for Left (0), Center (1), and Right (2) selector positions",
+    )
+    pos_values: List[float] = Field(
+        default_factory=lambda: [0.0, 1.0, 2.0],
+        description="Dataref values for Left (0), Center (1), and Right (2) selector positions",
+    )
+    cmd_pos_0: Optional[str] = Field(
+        None, description="Optional direct command for Left position (index 0)"
+    )
+    cmd_pos_1: Optional[str] = Field(
+        None, description="Optional direct command for Center position (index 1)"
+    )
+    cmd_pos_2: Optional[str] = Field(
+        None, description="Optional direct command for Right position (index 2)"
     )
 
     # Direct Dataref step mode for Knob / Slider bounds

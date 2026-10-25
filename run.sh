@@ -113,5 +113,11 @@ echo "  Press CTRL+C to stop the server / Premi CTRL+C per fermare."
 echo "=================================================================="
 echo ""
 
-# 5. Start FastAPI / Uvicorn server
-exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT"
+# 5. Stop any previous XP12 WebDeck instance holding the port, then start Uvicorn
+if pgrep -f "uvicorn app.main:app" >/dev/null 2>&1; then
+    echo "[INFO] Arresto istanza precedente di XP12 WebDeck sulla porta ${PORT}..."
+    pkill -f "uvicorn app.main:app" >/dev/null 2>&1 || true
+    sleep 1
+fi
+
+exec uvicorn app.main:app --host 0.0.0.0 --port "$PORT" --reload

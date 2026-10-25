@@ -114,7 +114,11 @@
               <select id="we-type" required>
                 <option value="button">Pulsante / Switch (Button + LED)</option>
                 <option value="knob">Manopola Ibrida / Encoder (Knob)</option>
-                <option value="slider">Cursore / Leva (Slider)</option>
+                <option value="selector3">Selettore Rotativo 3 Pos (STOP / RUN / START)</option>
+                <option value="switch2">Levetta Verticale 2 Pos (OFF / ON)</option>
+                <option value="switch3">Levetta Verticale 3 Pos (OFF / TAXI / LDG)</option>
+                <option value="gear">Leva Carrello (GEAR UP / DN)</option>
+                <option value="slider">Cursore / Leva Flap (Slider)</option>
                 <option value="display">Display Telemetria (Read-Only)</option>
               </select>
             </div>
@@ -268,6 +272,55 @@
             <div class="form-field">
               <label for="we-pull-label">Badge PULL</label>
               <input type="text" id="we-pull-label" placeholder="PULL / SEL" value="PULL" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2B-2: 3-Position Rotary Selector (STOP / RUN / START) -->
+        <div id="section-selector3" class="form-section hidden">
+          <h3 class="section-heading">2. Selettore a 3 Posizioni (Sinistra • Centro • Destra)</h3>
+          <div class="form-grid-3">
+            <div class="form-field">
+              <label for="we-sel3-lbl0">Etichetta Sinistra (Pos 0)</label>
+              <input type="text" id="we-sel3-lbl0" placeholder="STOP" value="STOP" />
+            </div>
+            <div class="form-field">
+              <label for="we-sel3-lbl1">Etichetta Centro (Pos 1)</label>
+              <input type="text" id="we-sel3-lbl1" placeholder="RUN" value="RUN" />
+            </div>
+            <div class="form-field">
+              <label for="we-sel3-lbl2">Etichetta Destra (Pos 2)</label>
+              <input type="text" id="we-sel3-lbl2" placeholder="START" value="START" />
+            </div>
+          </div>
+
+          <div class="form-grid-3 mt-compact">
+            <div class="form-field">
+              <label for="we-sel3-val0">Valore Dataref Sinistra</label>
+              <input type="number" id="we-sel3-val0" step="any" value="0" />
+            </div>
+            <div class="form-field">
+              <label for="we-sel3-val1">Valore Dataref Centro</label>
+              <input type="number" id="we-sel3-val1" step="any" value="1" />
+            </div>
+            <div class="form-field">
+              <label for="we-sel3-val2">Valore Dataref Destra</label>
+              <input type="number" id="we-sel3-val2" step="any" value="2" />
+            </div>
+          </div>
+
+          <div class="form-grid-3 mt-compact">
+            <div class="form-field">
+              <label for="we-sel3-cmd0">Comando Diretto Sinistra (Opzionale)</label>
+              <input type="text" id="we-sel3-cmd0" placeholder="es. comando diretto STOP" />
+            </div>
+            <div class="form-field">
+              <label for="we-sel3-cmd1">Comando Diretto Centro (Opzionale)</label>
+              <input type="text" id="we-sel3-cmd1" placeholder="es. comando diretto RUN" />
+            </div>
+            <div class="form-field">
+              <label for="we-sel3-cmd2">Comando Diretto Destra (Opzionale)</label>
+              <input type="text" id="we-sel3-cmd2" placeholder="es. comando diretto START" />
             </div>
           </div>
         </div>

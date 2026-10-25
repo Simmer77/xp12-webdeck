@@ -90,11 +90,14 @@ export class VisualEditor {
   _updateSectionVisibility(widgetType) {
     const secButton = document.getElementById("section-button");
     const secKnob = document.getElementById("section-knob");
+    const secSel3 = document.getElementById("section-selector3");
     const secBounds = document.getElementById("section-bounds");
 
+    const isThreePos = widgetType === "selector3" || widgetType === "switch3" || widgetType === "switch2";
     secButton.classList.toggle("hidden", widgetType !== "button");
-    secKnob.classList.toggle("hidden", widgetType !== "knob");
-    secBounds.classList.toggle("hidden", widgetType !== "knob" && widgetType !== "slider");
+    secKnob.classList.toggle("hidden", widgetType !== "knob" && !isThreePos && widgetType !== "gear");
+    if (secSel3) secSel3.classList.toggle("hidden", !isThreePos);
+    secBounds.classList.toggle("hidden", widgetType !== "knob" && widgetType !== "slider" && !isThreePos);
   }
 
   async refreshButtonImagesList() {
@@ -241,6 +244,19 @@ export class VisualEditor {
     document.getElementById("we-cmd-pull").value = w.cmd_pull || "";
     document.getElementById("we-pull-label").value = w.pull_label || "PULL";
 
+    // 3-Position Selector fields
+    const posLabels = Array.isArray(w.pos_labels) && w.pos_labels.length >= 3 ? w.pos_labels : ["STOP", "RUN", "START"];
+    const posValues = Array.isArray(w.pos_values) && w.pos_values.length >= 3 ? w.pos_values : [0, 1, 2];
+    document.getElementById("we-sel3-lbl0").value = posLabels[0] ?? "STOP";
+    document.getElementById("we-sel3-lbl1").value = posLabels[1] ?? "RUN";
+    document.getElementById("we-sel3-lbl2").value = posLabels[2] ?? "START";
+    document.getElementById("we-sel3-val0").value = posValues[0] ?? 0;
+    document.getElementById("we-sel3-val1").value = posValues[1] ?? 1;
+    document.getElementById("we-sel3-val2").value = posValues[2] ?? 2;
+    document.getElementById("we-sel3-cmd0").value = w.cmd_pos_0 || "";
+    document.getElementById("we-sel3-cmd1").value = w.cmd_pos_1 || "";
+    document.getElementById("we-sel3-cmd2").value = w.cmd_pos_2 || "";
+
     // Numeric bounds
     document.getElementById("we-write-dref-num").value = w.write_dataref || "";
     document.getElementById("we-min-val").value = w.min_value ?? 0;
@@ -280,6 +296,11 @@ export class VisualEditor {
         ? document.getElementById("we-write-dref-btn").value.trim()
         : document.getElementById("we-write-dref-num").value.trim();
 
+    const existingIdx = tab.widgets.findIndex((item) => item.id === existingId);
+    const prevWidget = existingIdx >= 0 ? tab.widgets[existingIdx] : null;
+    const isThreePos = type === "selector3" || type === "switch3";
+    const isTwoPos = type === "switch2";
+
     const widgetObj = {
       id: existingId || `w_${Date.now().toString(36)}`,
       type,
@@ -310,6 +331,33 @@ export class VisualEditor {
       cmd_pull: document.getElementById("we-cmd-pull").value.trim() || null,
       push_label: document.getElementById("we-push-label").value.trim() || "PUSH",
       pull_label: document.getElementById("we-pull-label").value.trim() || "PULL",
+      pos_labels: isThreePos
+        ? [
+            document.getElementById("we-sel3-lbl0").value.trim() || "STOP",
+            document.getElementById("we-sel3-lbl1").value.trim() || "RUN",
+            document.getElementById("we-sel3-lbl2").value.trim() || "START",
+          ]
+        : isTwoPos
+        ? [
+            document.getElementById("we-sel3-lbl0").value.trim() || "OFF",
+            document.getElementById("we-sel3-lbl1").value.trim() || "ON",
+          ]
+        : prevWidget?.pos_labels || null,
+      pos_values: isThreePos
+        ? [
+            parseFloat(document.getElementById("we-sel3-val0").value) || 0.0,
+            parseFloat(document.getElementById("we-sel3-val1").value) ?? 1.0,
+            parseFloat(document.getElementById("we-sel3-val2").value) ?? 2.0,
+          ]
+        : isTwoPos
+        ? [
+            parseFloat(document.getElementById("we-sel3-val0").value) || 0.0,
+            parseFloat(document.getElementById("we-sel3-val1").value) ?? 1.0,
+          ]
+        : prevWidget?.pos_values || null,
+      cmd_pos_0: document.getElementById("we-sel3-cmd0").value.trim() || null,
+      cmd_pos_1: document.getElementById("we-sel3-cmd1").value.trim() || null,
+      cmd_pos_2: document.getElementById("we-sel3-cmd2").value.trim() || null,
       step_fine: parseFloat(document.getElementById("we-step-fine").value) || 1.0,
       step_coarse: parseFloat(document.getElementById("we-step-coarse").value) || 10.0,
       min_value: parseFloat(document.getElementById("we-min-val").value) ?? 0.0,
@@ -324,9 +372,8 @@ export class VisualEditor {
       display_multiplier: parseFloat(document.getElementById("we-multiplier").value) || 1.0,
     };
 
-    const idx = tab.widgets.findIndex((item) => item.id === existingId);
-    if (idx >= 0) {
-      tab.widgets[idx] = widgetObj;
+    if (existingIdx >= 0) {
+      tab.widgets[existingIdx] = widgetObj;
     } else {
       tab.widgets.push(widgetObj);
     }

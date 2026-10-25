@@ -480,11 +480,12 @@ body {
   color: var(--text-primary);
   text-transform: uppercase;
   line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
 }
 
 .widget-button.is-active .btn-label {
-  color: var(--w-accent);
-  text-shadow: 0 0 8px var(--w-glow);
+  color: #ffffff;
+  text-shadow: 0 1px 3px #000000, 0 0 5px #000000, 0 0 10px var(--w-glow);
 }
 
 .btn-sublabel {
@@ -496,11 +497,11 @@ body {
 }
 
 /* ========================================================================= */
-/* WIDGET 2: HYBRID ROTARY KNOB / ENCODER                                    */
+/* WIDGET 2: HYBRID ROTARY KNOB / ENCODER (ENG-STYLE CLEAN COCKPIT DIAL)     */
 /* ========================================================================= */
 
 .widget-knob {
-  padding: 6px 6px;
+  padding: 6px 8px;
   justify-content: space-between;
   align-items: stretch;
   gap: 4px;
@@ -510,18 +511,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
+  gap: 6px;
   padding: 0 2px;
+  flex-shrink: 0;
 }
 
 .knob-title-wrap {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1;
 }
 
 .knob-title {
-  font-size: clamp(0.68rem, 1.1vw, 0.82rem);
+  font-size: clamp(0.68rem, 1.08vw, 0.82rem);
   font-weight: 800;
   letter-spacing: 0.05em;
   color: var(--text-primary);
@@ -531,7 +534,7 @@ body {
 }
 
 .knob-subtitle {
-  font-size: 0.56rem;
+  font-size: 0.54rem;
   font-weight: 600;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -539,75 +542,363 @@ body {
   text-overflow: ellipsis;
 }
 
-/* 7-Segment / Monospace Digital Readout above Knob */
+/* Compact Inline Digital Readout on Right of Header */
 .knob-lcd {
   background: var(--bg-lcd);
-  border: 1px solid #26354a;
+  border: 1.5px solid #293b54;
   border-radius: 6px;
-  padding: 3px 8px;
+  padding: 2px 7px;
   text-align: right;
   font-family: var(--font-lcd);
-  font-size: clamp(0.88rem, 1.55vw, 1.2rem);
-  font-weight: 800;
+  font-size: clamp(0.8rem, 1.35vw, 1.05rem);
+  font-weight: 900;
   color: var(--w-accent);
   text-shadow: 0 0 8px var(--w-glow);
-  letter-spacing: 0.06em;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.85);
+  letter-spacing: 0.04em;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9);
   flex-shrink: 0;
 }
 
-/* Middle Interactive Zone: Side Tap Columns + Central Rotary SVG Dial */
-.knob-interactive-row {
+/* Center Stage for Bounded Dimmers (PANEL / UP WASH) */
+.knob-dial-stage {
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(34px, 1fr) minmax(64px, 1.8fr) minmax(34px, 1fr);
+  width: 100%;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.knob-dial-wrap {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.knob-dial-wrap.pushed .knob-dial-svg {
+  transform: scale(0.93);
+  filter: drop-shadow(0 0 10px var(--led-green-glow));
+}
+
+.knob-dial-wrap.pulled .knob-dial-svg {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 10px var(--led-amber-glow));
+}
+
+/* ========================================================================= */
+/* ENDLESS ENCODER 3-COLUMN DECK (Left Wing | PUSH + Wheel + PULL | Right)   */
+/* ========================================================================= */
+
+.knob-endless-deck {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(42px, 0.9fr) minmax(68px, 1.35fr) minmax(42px, 0.9fr);
+  align-items: stretch;
+  gap: 6px;
+}
+
+.knob-compact-col .knob-endless-deck {
+  grid-template-columns: minmax(34px, 0.85fr) minmax(52px, 1.2fr) minmax(34px, 0.85fr);
   gap: 4px;
 }
 
-.knob-side-col {
-  height: 100%;
+/* Left & Right Wing Columns (2 Stacked Increment / Decrement Buttons each) */
+.knob-wing-col {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
+  min-width: 0;
 }
 
-.knob-step-btn {
+.knob-wing-col .wing-btn {
   flex: 1;
-  max-height: 48px;
-  min-height: 26px;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #1f2b3e 0%, #141c29 100%);
-  border: 1px solid var(--border-highlight);
-  color: var(--text-primary);
-  font-family: var(--font-lcd);
-  font-size: 0.78rem;
-  font-weight: 800;
-  cursor: pointer;
+  min-height: 28px;
+  height: auto;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: clamp(0.7rem, 1.15vw, 0.9rem);
+}
+
+.knob-compact-col .knob-wing-col .wing-btn {
+  font-size: clamp(0.58rem, 0.92vw, 0.72rem);
+  padding: 0 2px;
+}
+
+/* Center Column: PUSH on top, 360° Endless Wheel in middle, PULL on bottom */
+.knob-center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.knob-endless-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
   touch-action: none;
 }
 
-.knob-step-btn.coarse {
-  color: var(--w-accent);
-  border-color: rgba(255, 255, 255, 0.18);
-}
-
-.knob-step-btn:active {
-  transform: scale(0.93);
-  border-color: var(--w-accent);
-  background: #26364f;
-}
-
-/* Central SVG Rotary Encoder */
-.knob-dial-container {
-  position: relative;
+.knob-endless-svg {
   width: 100%;
   height: 100%;
+  max-width: 98px;
+  max-height: 98px;
+  overflow: visible;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.65));
+  transition: transform 0.1s ease, filter 0.12s ease;
+}
+
+.endless-rotor-group {
+  transform-origin: 54px 54px;
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Wide PUSH (Top) and PULL (Bottom) Buttons ("grandezza due quadratini") */
+.knob-cap-btn {
+  width: 100%;
+  min-height: 25px;
+  padding: 2px 5px;
+  border-radius: 6px;
+  font-family: var(--font-lcd);
+  cursor: pointer;
+  touch-action: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.12s ease;
+}
+
+.knob-cap-btn .cap-tag {
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.knob-cap-btn .cap-val {
+  font-size: clamp(0.62rem, 0.96vw, 0.74rem);
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+}
+
+.knob-compact-col .knob-cap-btn {
+  padding: 2px 3px;
+  gap: 2px;
+}
+
+.knob-compact-col .knob-cap-btn .cap-tag {
+  font-size: 0.48rem;
+}
+
+.knob-compact-col .knob-cap-btn .cap-val {
+  font-size: 0.56rem;
+}
+
+.knob-cap-btn.push-cap {
+  background: linear-gradient(180deg, #073b20 0%, #031f10 100%);
+  border: 1.5px solid var(--led-green);
+  color: var(--led-green);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.25);
+}
+
+.knob-cap-btn.pull-cap {
+  background: linear-gradient(180deg, #4a3004 0%, #241702 100%);
+  border: 1.5px solid var(--led-amber);
+  color: var(--led-amber);
+  box-shadow: 0 0 8px rgba(255, 171, 0, 0.25);
+}
+
+.knob-cap-btn:active,
+.knob-cap-btn.flash {
+  transform: scale(0.95);
+  filter: brightness(1.35);
+}
+
+/* Single Horizontal Bottom Button Bar matching selector3-btn-bar (for Bounded Dimmers) */
+.knob-btn-bar.four-btns {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.knob-btn-bar.two-btns {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+
+.knob-pos-btn {
+  height: 30px;
+  padding: 0 2px;
+  font-size: clamp(0.64rem, 1.02vw, 0.78rem);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* Fine (Unità) Button Style */
+.knob-pos-btn.fine {
+  background: linear-gradient(180deg, #16293d 0%, #0d1824 100%);
+  border: 1.5px solid var(--w-accent);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+}
+
+/* Coarse (Decine / Centinaia / Migliaia) Button Style */
+.knob-pos-btn.coarse {
+  background: linear-gradient(180deg, #3b2605 0%, #1f1302 100%);
+  border: 1.5px solid var(--led-amber);
+  color: #ffd54f;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+}
+
+.knob-compact-col .knob-pos-btn {
+  font-size: clamp(0.58rem, 0.9vw, 0.7rem);
+}
+
+/* ========================================================================= */
+/* WIDGET 2B: 3-POSITION COCKPIT ROTARY SELECTOR (STOP / RUN / START)        */
+/* ========================================================================= */
+
+.widget-selector3 {
+  padding: 6px 8px;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.selector3-dial-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.selector3-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 148px;
+  max-height: 118px;
+  overflow: visible;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.65));
+}
+
+.selector3-rotor-group {
+  transform-origin: 70px 66px;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sel3-svg-lbl {
+  fill: #7285a1;
+  transition: fill 0.12s ease;
+}
+
+.sel3-svg-lbl.active {
+  fill: var(--w-accent);
+  filter: drop-shadow(0 0 4px var(--w-glow));
+}
+
+.selector3-btn-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.selector3-pos-btn {
+  height: 30px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #1b2536 0%, #101722 100%);
+  border: 1px solid var(--border-highlight);
+  color: var(--text-secondary);
+  font-family: var(--font-lcd);
+  font-size: clamp(0.64rem, 1.05vw, 0.78rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  touch-action: none;
+  transition: all 0.1s ease;
+}
+
+.selector3-pos-btn:active {
+  transform: scale(0.95);
+}
+
+.selector3-pos-btn.pos-0.active {
+  border: 1.5px solid var(--led-red);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #4a1018 0%, #26070b 100%);
+  box-shadow: 0 0 8px rgba(255, 61, 87, 0.45);
+}
+
+.selector3-pos-btn.pos-1.active {
+  border: 1.5px solid var(--led-green);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #073b20 0%, #031f10 100%);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.45);
+}
+
+.selector3-pos-btn.pos-2.active {
+  border: 1.5px solid var(--led-amber);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #4a3004 0%, #261802 100%);
+  box-shadow: 0 0 10px rgba(255, 171, 0, 0.45);
+}
+
+/* ========================================================================= */
+/* WIDGET 2C: VERTICAL TOGGLE SWITCH (2-POS OFF/ON & 3-POS OFF/TAXI/LDG)     */
+/* ========================================================================= */
+
+.widget-switch3 {
+  padding: 6px 6px;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.widget-switch3.is-active {
+  border-color: var(--w-accent);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.55), 0 0 8px var(--w-glow);
+}
+
+.switch3-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.32fr 0.82fr;
+  align-items: center;
+  gap: 4px;
+}
+
+.switch3-lever-wrap {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -615,72 +906,284 @@ body {
   touch-action: none;
 }
 
-.knob-svg {
+.switch3-svg {
   width: 100%;
   height: 100%;
-  max-width: 112px;
-  max-height: 112px;
+  max-width: 108px;
+  max-height: 146px;
   overflow: visible;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.65));
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.7));
 }
 
-.knob-rotor-group {
-  transform-origin: 60px 60px;
-  transition: transform 0.04s linear;
+.switch3-bat-group {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.knob-center-cap {
-  transition: fill 0.12s ease, stroke 0.12s ease;
+.switch3-tip-cap {
+  transition: stroke 0.12s ease, fill 0.12s ease;
 }
 
-.knob-dial-container.pushed .knob-center-cap {
-  fill: #1b3a2f;
-  stroke: var(--led-green);
+.switch3-cap-text {
+  fill: #ffffff;
+  paint-order: stroke;
+  stroke: #02060d;
+  stroke-width: 2.8px;
+  stroke-linejoin: round;
 }
 
-.knob-dial-container.pulled .knob-center-cap {
-  fill: #3d2c0e;
+/* Toggle Handle Cap Color by Active Role (High-Contrast Dark Fill + Crisp White Text) */
+.widget-switch3[data-switch-role="top"] .switch3-tip-cap {
+  fill: #052e19;
+  stroke: var(--w-accent);
+}
+
+.widget-switch3[data-switch-role="mid"] .switch3-tip-cap {
+  fill: #332104;
   stroke: var(--led-amber);
 }
 
-/* Bottom Push / Pull Action Badges */
-.knob-footer-badges {
+.widget-switch3[data-switch-role="off"] .switch3-tip-cap {
+  fill: #330c11;
+  stroke: var(--led-red);
+}
+
+.switch3-stack-col {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.switch3-pos-btn {
+  flex: 0 1 34px;
+  min-height: 24px;
+  max-height: 36px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #1b2536 0%, #101722 100%);
+  border: 1px solid var(--border-highlight);
+  color: var(--text-secondary);
+  font-family: var(--font-lcd);
+  font-size: clamp(0.68rem, 1.05vw, 0.82rem);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  white-space: nowrap;
+  transition: all 0.1s ease;
+}
+
+.switch3-pos-btn:active {
+  transform: scale(0.95);
+}
+
+/* Illuminated Active Position Buttons (High-Contrast White Text on Rich Colored Pill) */
+.switch3-pos-btn.role-top.active {
+  border: 1.5px solid var(--w-accent);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #073b20 0%, #031f10 100%);
+  box-shadow: 0 0 8px var(--w-glow);
+}
+
+.switch3-pos-btn.role-mid.active {
+  border: 1.5px solid var(--led-amber);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #4a3004 0%, #261802 100%);
+  box-shadow: 0 0 8px var(--led-amber-glow);
+}
+
+.switch3-pos-btn.role-off.active {
+  border: 1.5px solid var(--led-red);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #4a1018 0%, #26070b 100%);
+  box-shadow: 0 0 8px rgba(255, 61, 87, 0.4);
+}
+
+/* ========================================================================= */
+/* WIDGET 2D: VERTICAL LANDING GEAR LEVER (UP / DN + 3 GREEN LIGHTS)         */
+/* ========================================================================= */
+
+.widget-gear {
+  padding: 6px 8px;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 5px;
+}
+
+.gear-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-  flex-shrink: 0;
 }
 
-.knob-action-badge {
+.gear-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.gear-lights-triangle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.gear-lights-main-row {
+  display: flex;
+  gap: 3px;
+}
+
+.gear-led {
+  width: 14px;
+  height: 11px;
+  border-radius: 3px;
+  background: #090d14;
+  border: 1px solid #263449;
+  color: #475569;
+  font-family: var(--font-lcd);
+  font-size: 0.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.14s ease;
+}
+
+.widget-gear.gear-is-down .gear-led {
+  background: #052e19;
+  border-color: var(--led-green);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000;
+  box-shadow: 0 0 6px var(--led-green-glow);
+}
+
+.gear-body {
   flex: 1;
-  padding: 3px 4px;
-  border-radius: 4px;
-  background: #0d131d;
-  border: 1px solid var(--border-bezel);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.gear-pos-btn {
+  height: 26px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #1b2536 0%, #101722 100%);
+  border: 1px solid var(--border-highlight);
   color: var(--text-secondary);
   font-family: var(--font-lcd);
-  font-size: 0.62rem;
-  font-weight: 700;
-  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
   cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  touch-action: none;
+  flex-shrink: 0;
+  transition: all 0.1s ease;
 }
 
-.knob-action-badge.push-badge:active,
-.knob-action-badge.push-badge.flash {
+.gear-pos-btn.pos-up.active {
+  border: 1.5px solid var(--led-amber);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #4a3004 0%, #261802 100%);
+  box-shadow: 0 0 8px rgba(255, 171, 0, 0.4);
+}
+
+.gear-pos-btn.pos-dn.active {
+  border: 1.5px solid var(--led-green);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #073b20 0%, #031f10 100%);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.45);
+}
+
+.gear-track-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  padding: 4px 0;
+}
+
+.gear-slot {
+  position: relative;
+  width: 24px;
+  height: 100%;
+  background: #070a0f;
+  border: 1.5px solid #2b3b54;
+  border-radius: 10px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.92);
+}
+
+.gear-slot-detent {
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  height: 2px;
+  background: #475569;
+}
+
+.gear-slot-detent.detent-up {
+  top: 22%;
+}
+
+.gear-slot-detent.detent-dn {
+  top: 78%;
+}
+
+.gear-wheel-handle {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  transform: translate(-50%, -50%);
+  transition: top 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.gear-wheel-tire {
+  width: 58px;
+  height: 28px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 35%, #334155 0%, #0f172a 100%);
+  border: 2.5px dashed #94a3b8;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.widget-gear.gear-is-down .gear-wheel-tire {
   border-color: var(--led-green);
-  color: var(--led-green);
-  background: rgba(0, 230, 118, 0.14);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.85), 0 0 10px var(--led-green-glow);
 }
 
-.knob-action-badge.pull-badge:active,
-.knob-action-badge.pull-badge.flash {
+.widget-gear.gear-is-up .gear-wheel-tire {
   border-color: var(--led-amber);
-  color: var(--led-amber);
-  background: rgba(255, 171, 0, 0.14);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.85), 0 0 10px var(--led-amber-glow);
+}
+
+.gear-wheel-hub {
+  font-family: var(--font-lcd);
+  font-size: 0.56rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  letter-spacing: 0.05em;
 }
 
 /* ========================================================================= */
@@ -713,10 +1216,15 @@ body {
   font-weight: 800;
   color: var(--w-accent);
   text-shadow: 0 0 8px var(--w-glow);
+  background: var(--bg-lcd);
+  border: 1px solid #243246;
+  border-radius: 5px;
+  padding: 1px 6px;
 }
 
 .slider-track-area {
   flex: 1;
+  min-height: 0;
   position: relative;
   display: flex;
   align-items: center;
@@ -724,6 +1232,15 @@ body {
   padding: 6px;
   cursor: pointer;
   touch-action: none;
+}
+
+.widget-slider.detented-lever.vertical .slider-track-area {
+  display: grid;
+  grid-template-columns: minmax(64px, 1fr) minmax(70px, 1.15fr);
+  align-items: stretch;
+  justify-items: center;
+  gap: 8px;
+  padding: 8px 4px;
 }
 
 .slider-slot {
@@ -742,6 +1259,16 @@ body {
 .widget-slider.horizontal .slider-slot {
   width: 100%;
   height: 26px;
+}
+
+.slider-detent-notch {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  height: 2px;
+  background: #475569;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .slider-fill {
@@ -771,18 +1298,69 @@ body {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.8), 0 0 8px var(--w-glow);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: top 0.12s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .widget-slider.vertical .slider-thumb {
   left: 50%;
-  width: 52px;
-  height: 22px;
+  width: 58px;
+  height: 24px;
 }
 
 .widget-slider.horizontal .slider-thumb {
   top: 50%;
   width: 24px;
   height: 44px;
+}
+
+.slider-thumb-cap {
+  font-family: var(--font-lcd);
+  font-size: 0.64rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  letter-spacing: 0.04em;
+}
+
+.slider-detent-col {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.slider-detent-btn {
+  flex: 1;
+  min-height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #1b2536 0%, #101722 100%);
+  border: 1px solid var(--border-highlight);
+  color: var(--text-secondary);
+  font-family: var(--font-lcd);
+  font-size: clamp(0.66rem, 1.05vw, 0.8rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  touch-action: none;
+  transition: all 0.1s ease;
+}
+
+.slider-detent-btn:active {
+  transform: scale(0.95);
+}
+
+.slider-detent-btn.active {
+  border: 1.5px solid var(--w-accent);
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000000, 0 0 4px #000000;
+  background: linear-gradient(180deg, #073542 0%, #031921 100%);
+  box-shadow: 0 0 8px var(--w-glow);
 }
 
 /* ========================================================================= */

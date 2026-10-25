@@ -140,7 +140,11 @@ def extract_profile_datarefs(profile: AircraftProfile) -> Dict[str, int]:
 
 def apply_active_profile_subscriptions(icao: str) -> AircraftProfile:
     global active_profile_icao
-    profile = load_profile_from_disk(icao, fallback_to_default=True)
+    try:
+        profile = load_profile_from_disk(icao, fallback_to_default=True)
+    except Exception as exc:
+        logger.error("Error loading profile %s (%s), falling back to DEFAULT", icao, exc)
+        profile = load_profile_from_disk("DEFAULT", fallback_to_default=False)
     active_profile_icao = profile.icao
     drefs = extract_profile_datarefs(profile)
     xp_client.set_profile_subscriptions(drefs)
@@ -201,7 +205,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="XP12 WebDeck",
     description="Native Bidirectional LAN Command Deck & FCU/MCP/Garmin Panel for X-Plane 12",
-    version="1.0.0",
+    version="1.0.0-alpha",
     lifespan=lifespan,
 )
 
