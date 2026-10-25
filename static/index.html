@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0b1017" />
+  <title>XP12 WebDeck — Flight Simulation Command Deck</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/static/assets/buttons/korry_on.svg" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- TOP COCKPIT GLAreshield / NAVIGATION BAR -->
+  <header class="cockpit-header">
+    <div class="header-left">
+      <div class="brand-badge">
+        <span class="brand-dot"></span>
+        <div class="brand-titles">
+          <span class="brand-main">XP12 WEBDECK</span>
+          <span class="brand-sub">UDP NATIVE PANEL</span>
+        </div>
+      </div>
+
+      <!-- Connection & Telemetry Indicators -->
+      <div class="telemetry-pills">
+        <div id="ws-status-pill" class="status-pill offline" title="Stato WebSocket Server">
+          <span class="pill-led"></span>
+          <span id="ws-status-text">WS OFFLINE</span>
+        </div>
+
+        <button id="xp-status-pill" class="status-pill waiting" type="button" title="Clicca per configurare IP/Porta UDP X-Plane 12">
+          <span class="pill-led"></span>
+          <span id="xp-status-text">XP12 UDP :49000</span>
+        </button>
+
+        <div class="icao-pill" title="Codice ICAO aeromobile rilevato da X-Plane 12">
+          <span class="icao-label">ACF ICAO</span>
+          <span id="detected-icao-value" class="icao-value">----</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Selector & Auto-Switch Controls -->
+    <div class="header-right">
+      <button id="btn-autoswitch" class="hw-toggle active" type="button" title="Cambio automatico profilo quando cambi aereo in X-Plane">
+        <span class="toggle-led"></span>
+        <span class="toggle-text">AUTO-SWITCH: <strong id="autoswitch-state">ON</strong></span>
+      </button>
+
+      <div class="profile-select-group">
+        <label for="profile-select" class="sr-only">Profilo Aereo</label>
+        <select id="profile-select" class="hw-select" title="Seleziona manualmente un profilo aereo">
+          <option value="DEFAULT">DEFAULT — Universal</option>
+        </select>
+        <button id="btn-new-profile" class="hw-icon-btn" type="button" title="Crea o clona un nuovo profilo aereo">
+          ＋
+        </button>
+      </div>
+
+      <button id="btn-reload-json" class="hw-btn" type="button" title="Ricarica i file JSON dal disco (Hot-Reload)">
+        ↻ JSON
+      </button>
+
+      <button id="btn-fullscreen" class="hw-btn" type="button" title="Schermo intero su Tablet">
+        ⛶
+      </button>
+
+      <button id="btn-edit-mode" class="hw-btn edit-toggle-btn" type="button" title="Attiva/Disattiva Editor Visuale">
+        ✎ EDIT
+      </button>
+    </div>
+  </header>
+
+  <!-- SECTION TABS BAR -->
+  <nav class="tabs-bar" aria-label="Pagine pannello aeromobile">
+    <div id="tabs-list" class="tabs-list"></div>
+    <div id="edit-tab-actions" class="edit-tab-actions hidden">
+      <button id="btn-add-tab" class="tab-action-btn" type="button">＋ Nuova Scheda</button>
+      <button id="btn-config-tab" class="tab-action-btn" type="button">⚙ Griglia / Nome</button>
+      <button id="btn-delete-tab" class="tab-action-btn danger" type="button">🗑 Elimina Scheda</button>
+    </div>
+  </nav>
+
+  <!-- MAIN INTERACTIVE COMMAND GRID -->
+  <main class="deck-viewport">
+    <div id="deck-grid" class="deck-grid" role="region" aria-label="Griglia comandi di volo"></div>
+  </main>
+
+  <!-- TOAST NOTIFICATION BANNER -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: VISUAL WIDGET EDITOR                                         -->
+  <!-- ===================================================================== -->
+  <div id="widget-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="widget-modal-title">
+    <div class="modal-panel modal-large">
+      <div class="modal-header">
+        <h2 id="widget-modal-title">Configura Controllo</h2>
+        <button id="btn-close-widget-modal" class="modal-close-btn" type="button">✕</button>
+      </div>
+
+      <form id="widget-editor-form" class="modal-body">
+        <input type="hidden" id="we-id" />
+
+        <!-- Row 1: Type, Label, Sublabel, Color -->
+        <div class="form-section">
+          <h3 class="section-heading">1. Identità & Posizione in Griglia</h3>
+          <div class="form-grid-4">
+            <div class="form-field">
+              <label for="we-type">Tipo Widget</label>
+              <select id="we-type" required>
+                <option value="button">Pulsante / Switch (Button + LED)</option>
+                <option value="knob">Manopola Ibrida / Encoder (Knob)</option>
+                <option value="slider">Cursore / Leva (Slider)</option>
+                <option value="display">Display Telemetria (Read-Only)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="we-label">Etichetta Principale</label>
+              <input type="text" id="we-label" placeholder="es. HDG SEL o AP 1" required />
+            </div>
+            <div class="form-field">
+              <label for="we-sublabel">Sottotitolo / Note</label>
+              <input type="text" id="we-sublabel" placeholder="es. PUSH MNGD • PULL SEL" />
+            </div>
+            <div class="form-field">
+              <label for="we-color">Colore LED / Display</label>
+              <select id="we-color">
+                <option value="green">Verde (Green Cockpit)</option>
+                <option value="amber">Ambra (Boeing/Airbus Amber)</option>
+                <option value="cyan">Ciano (Garmin/EFIS Cyan)</option>
+                <option value="red">Rosso (Master/Warn Red)</option>
+                <option value="white">Bianco (Korry White)</option>
+                <option value="magenta">Magenta (FMS Target)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-4 mt-compact">
+            <div class="form-field">
+              <label for="we-row">Riga (0-based)</label>
+              <input type="number" id="we-row" min="0" max="11" required />
+            </div>
+            <div class="form-field">
+              <label for="we-col">Colonna (0-based)</label>
+              <input type="number" id="we-col" min="0" max="11" required />
+            </div>
+            <div class="form-field">
+              <label for="we-row-span">Altezza (Row Span)</label>
+              <input type="number" id="we-row-span" min="1" max="8" value="1" required />
+            </div>
+            <div class="form-field">
+              <label for="we-col-span">Larghezza (Col Span)</label>
+              <input type="number" id="we-col-span" min="1" max="12" value="1" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2A: Button Specific Config -->
+        <div id="section-button" class="form-section">
+          <h3 class="section-heading">2. Azione Pulsante & Immagini Personalizzate</h3>
+          <div class="form-grid-3">
+            <div class="form-field">
+              <label for="we-action-type">Modalità Invio</label>
+              <select id="we-action-type">
+                <option value="cmnd">Invia Comando (CMND)</option>
+                <option value="dref_toggle">Inverti Dataref ON/OFF (DREF Toggle)</option>
+                <option value="dref_set">Scrivi Valore Fisso in Dataref (DREF Set)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="we-command">Comando X-Plane (CMND)</label>
+              <input type="text" id="we-command" placeholder="es. sim/autopilot/heading" />
+            </div>
+            <div class="form-field">
+              <label for="we-write-dref-btn">Dataref Scrittura (DREF opzionale)</label>
+              <input type="text" id="we-write-dref-btn" placeholder="es. sim/cockpit2/switches/beacon_on" />
+            </div>
+          </div>
+
+          <div class="form-grid-4 mt-compact">
+            <div class="form-field">
+              <label for="we-on-value">Valore ON</label>
+              <input type="number" id="we-on-value" step="any" value="1" />
+            </div>
+            <div class="form-field">
+              <label for="we-off-value">Valore OFF</label>
+              <input type="number" id="we-off-value" step="any" value="0" />
+            </div>
+            <div class="form-field">
+              <label for="we-led-mode">Modalità LED Stato</label>
+              <select id="we-led-mode">
+                <option value="threshold">Attivo se ≥ Soglia (Threshold)</option>
+                <option value="exact">Attivo se == Soglia (Exact)</option>
+                <option value="nonzero">Attivo se ≠ 0 (Non-Zero)</option>
+                <option value="none">Nessun LED (Solo Push)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="we-led-threshold">Soglia LED</label>
+              <input type="number" id="we-led-threshold" step="any" value="0.5" />
+            </div>
+          </div>
+
+          <!-- Custom Button Textures (OFF / ON) -->
+          <div class="form-grid-2 mt-compact">
+            <div class="form-field">
+              <label for="we-image-off">Texture Pulsante OFF (Opzionale)</label>
+              <select id="we-image-off">
+                <option value="">-- Nessuna immagine (Stile Hardware Nativo) --</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="we-image-on">Texture Pulsante ON (Opzionale)</label>
+              <select id="we-image-on">
+                <option value="">-- Nessuna immagine (Stile Hardware Nativo) --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="upload-bar mt-compact">
+            <label class="upload-label">
+              <span>📤 Carica Nuova Texture Pulsante (PNG/JPG/SVG):</span>
+              <input type="file" id="we-image-upload" accept=".png,.jpg,.jpeg,.svg,.webp" />
+            </label>
+            <span id="upload-status-msg" class="upload-hint">Salva in static/assets/buttons/</span>
+          </div>
+        </div>
+
+        <!-- Section 2B: Hybrid Knob Specific Config -->
+        <div id="section-knob" class="form-section hidden">
+          <h3 class="section-heading">2. Comandi & Passi Manopola Ibrida (Swipe, -/+, Push/Pull)</h3>
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label for="we-cmd-inc-fine">Comando + Fine (Inner CW / Tap +)</label>
+              <input type="text" id="we-cmd-inc-fine" placeholder="es. sim/autopilot/heading_up" />
+            </div>
+            <div class="form-field">
+              <label for="we-cmd-dec-fine">Comando - Fine (Inner CCW / Tap -)</label>
+              <input type="text" id="we-cmd-dec-fine" placeholder="es. sim/autopilot/heading_down" />
+            </div>
+            <div class="form-field">
+              <label for="we-cmd-inc-coarse">Comando ++ Coarse (Outer CW / Tap ++)</label>
+              <input type="text" id="we-cmd-inc-coarse" placeholder="es. sim/GPS/g1000n1_fms_outer_up" />
+            </div>
+            <div class="form-field">
+              <label for="we-cmd-dec-coarse">Comando -- Coarse (Outer CCW / Tap --)</label>
+              <input type="text" id="we-cmd-dec-coarse" placeholder="es. sim/GPS/g1000n1_fms_outer_down" />
+            </div>
+          </div>
+
+          <div class="form-grid-4 mt-compact">
+            <div class="form-field">
+              <label for="we-cmd-push">Comando Center PUSH (Tap)</label>
+              <input type="text" id="we-cmd-push" placeholder="es. sim/autopilot/heading_sync" />
+            </div>
+            <div class="form-field">
+              <label for="we-push-label">Badge PUSH</label>
+              <input type="text" id="we-push-label" placeholder="PUSH / MNGD" value="PUSH" />
+            </div>
+            <div class="form-field">
+              <label for="we-cmd-pull">Comando Center PULL (Long-Press/Badge)</label>
+              <input type="text" id="we-cmd-pull" placeholder="es. sim/autopilot/level_change" />
+            </div>
+            <div class="form-field">
+              <label for="we-pull-label">Badge PULL</label>
+              <input type="text" id="we-pull-label" placeholder="PULL / SEL" value="PULL" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2C: Dataref Direct Write & Bounds (Shared by Knob & Slider) -->
+        <div id="section-bounds" class="form-section hidden">
+          <h3 class="section-heading">3. Scrittura Diretta Dataref & Limiti Numerici</h3>
+          <div class="form-grid-4">
+            <div class="form-field">
+              <label for="we-write-dref-num">Dataref Scrittura (DREF)</label>
+              <input type="text" id="we-write-dref-num" placeholder="es. sim/cockpit2/controls/flap_ratio" />
+            </div>
+            <div class="form-field">
+              <label for="we-min-val">Valore Minimo</label>
+              <input type="number" id="we-min-val" step="any" value="0" />
+            </div>
+            <div class="form-field">
+              <label for="we-max-val">Valore Massimo</label>
+              <input type="number" id="we-max-val" step="any" value="360" />
+            </div>
+            <div class="form-field">
+              <label for="we-step-fine">Passo Fine (Step)</label>
+              <input type="number" id="we-step-fine" step="any" value="1" />
+            </div>
+          </div>
+          <div class="form-grid-3 mt-compact">
+            <div class="form-field">
+              <label for="we-step-coarse">Passo Largo (Coarse Step)</label>
+              <input type="number" id="we-step-coarse" step="any" value="10" />
+            </div>
+            <div class="form-field">
+              <label for="we-orientation">Orientamento Slider</label>
+              <select id="we-orientation">
+                <option value="vertical">Verticale (Leva Flaps/Gear)</option>
+                <option value="horizontal">Orizzontale (Trim/Speedbrake)</option>
+              </select>
+            </div>
+            <div class="form-field checkbox-field">
+              <label>
+                <input type="checkbox" id="we-wrap-around" />
+                Ciclico 360° (Wrap Around es. prua 001°-360°)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Telemetry Readout & RREF Subscription (Shared by all) -->
+        <div class="form-section">
+          <h3 class="section-heading">Telemetria Live (RREF) & Formattazione Display</h3>
+          <div class="form-grid-3">
+            <div class="form-field">
+              <label for="we-status-dref">Dataref Lettura Stato / Display (RREF)</label>
+              <input type="text" id="we-status-dref" placeholder="es. sim/cockpit2/autopilot/heading_dial_deg_mag_pilot" />
+            </div>
+            <div class="form-field">
+              <label for="we-secondary-dref">Secondo Dataref (es. Freq Standby)</label>
+              <input type="text" id="we-secondary-dref" placeholder="Opzionale per Display doppi" />
+            </div>
+            <div class="form-field">
+              <label for="we-freq-hz">Frequenza Aggiornamento (Hz)</label>
+              <input type="number" id="we-freq-hz" min="1" max="30" value="5" />
+            </div>
+          </div>
+
+          <div class="form-grid-6 mt-compact">
+            <div class="form-field">
+              <label for="we-prefix">Prefisso</label>
+              <input type="text" id="we-prefix" placeholder="es. HDG " />
+            </div>
+            <div class="form-field">
+              <label for="we-suffix">Suffisso / Unità</label>
+              <input type="text" id="we-suffix" placeholder="es.  FT o °" />
+            </div>
+            <div class="form-field">
+              <label for="we-decimals">Decimali</label>
+              <input type="number" id="we-decimals" min="0" max="6" value="0" />
+            </div>
+            <div class="form-field">
+              <label for="we-zero-pad">Zero Pad</label>
+              <input type="number" id="we-zero-pad" min="0" max="8" value="0" />
+            </div>
+            <div class="form-field">
+              <label for="we-multiplier">Moltiplicatore</label>
+              <input type="number" id="we-multiplier" step="any" value="1" />
+            </div>
+            <div class="form-field checkbox-field">
+              <label>
+                <input type="checkbox" id="we-show-plus" />
+                Mostra '+'
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btn-delete-widget" class="hw-btn danger-btn">🗑 Elimina Controllo</button>
+          <div class="footer-right">
+            <button type="button" id="btn-cancel-widget" class="hw-btn">Annulla</button>
+            <button type="submit" class="hw-btn primary-btn">💾 Salva nel Profilo JSON</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: TAB / GRID SETTINGS                                          -->
+  <!-- ===================================================================== -->
+  <div id="tab-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="tab-modal-title">Configura Scheda (Tab)</h2>
+        <button id="btn-close-tab-modal" class="modal-close-btn" type="button">✕</button>
+      </div>
+      <form id="tab-editor-form" class="modal-body">
+        <input type="hidden" id="te-mode" value="edit" />
+        <div class="form-field">
+          <label for="te-title">Nome Scheda</label>
+          <input type="text" id="te-title" placeholder="es. Autopilot (MCP/FCU)" required />
+        </div>
+        <div class="form-grid-2 mt-compact">
+          <div class="form-field">
+            <label for="te-cols">Colonne Griglia (2 - 12)</label>
+            <input type="number" id="te-cols" min="2" max="12" value="6" required />
+          </div>
+          <div class="form-field">
+            <label for="te-rows">Righe Griglia (1 - 8)</label>
+            <input type="number" id="te-rows" min="1" max="8" value="3" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <span></span>
+          <div class="footer-right">
+            <button type="button" id="btn-cancel-tab" class="hw-btn">Annulla</button>
+            <button type="submit" class="hw-btn primary-btn">Applica</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: NEW / CLONE AIRCRAFT PROFILE                                 -->
+  <!-- ===================================================================== -->
+  <div id="profile-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2>Nuovo Profilo Aeromobile</h2>
+        <button id="btn-close-profile-modal" class="modal-close-btn" type="button">✕</button>
+      </div>
+      <form id="profile-create-form" class="modal-body">
+        <div class="form-field">
+          <label for="pc-icao">Codice ICAO Aeromobile (es. C172, A339, MD82)</label>
+          <input type="text" id="pc-icao" maxlength="12" placeholder="C172" required />
+        </div>
+        <div class="form-field mt-compact">
+          <label for="pc-name">Nome Descrittivo</label>
+          <input type="text" id="pc-name" placeholder="Cessna 172 Skyhawk G1000" required />
+        </div>
+        <div class="form-field mt-compact">
+          <label for="pc-source">Clona Layout Iniziale Da</label>
+          <select id="pc-source"></select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btn-delete-current-profile" class="hw-btn danger-btn">🗑 Elimina Profilo Attuale</button>
+          <div class="footer-right">
+            <button type="button" id="btn-cancel-profile" class="hw-btn">Annulla</button>
+            <button type="submit" class="hw-btn primary-btn">Crea Profilo JSON</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: X-PLANE 12 UDP CONNECTION SETTINGS                           -->
+  <!-- ===================================================================== -->
+  <div id="udp-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2>Impostazioni Rete UDP X-Plane 12</h2>
+        <button id="btn-close-udp-modal" class="modal-close-btn" type="button">✕</button>
+      </div>
+      <form id="udp-settings-form" class="modal-body">
+        <div class="form-field">
+          <label for="udp-host">Indirizzo IP di X-Plane 12</label>
+          <input type="text" id="udp-host" value="127.0.0.1" required />
+        </div>
+        <div class="form-field mt-compact">
+          <label for="udp-port">Porta UDP di Ricezione X-Plane (Default: 49000)</label>
+          <input type="number" id="udp-port" min="1024" max="65535" value="49000" required />
+        </div>
+        <div class="modal-footer">
+          <span></span>
+          <div class="footer-right">
+            <button type="button" id="btn-cancel-udp" class="hw-btn">Chiudi</button>
+            <button type="submit" class="hw-btn primary-btn">Salva e Riconnetti</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "XP12 WebDeck — Cockpit Command Deck",
+  "short_name": "XP12 WebDeck",
+  "description": "Bidirectional Stream Deck + FCU/MCP/Garmin Panel for X-Plane 12 over LAN",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#080b10",
+  "theme_color": "#0b1017",
+  "icons": [
+    {
+      "src": "/static/assets/buttons/korry_on.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
