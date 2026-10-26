@@ -28,7 +28,7 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
     - Symmetrical levers: 4-position `SPEEDBRAKE` (ARM, RET, 1/2, FULL), 2-position `ENG 1 / ENG 2` Master switches, 3-position `ENG MODE` rotary selector (CRANK, NORM, IGN/START), and 5-position `FLAPS` lever.
   - **Overhead Tab**:
     - Converted all exterior and cabin lighting controls to realistic 2-position and 3-position toggle switches.
-    - Fixed `EXT PWR` dataref binding (`AirbusFBW/ExtPowOHPArray[0]`) to correctly reflect disconnect state in flight.
+    - Dynamic Airbus Korry annunciator logic for `EXT PWR`: automatically displays illuminated green `AVAIL` when ground GPU is plugged in, turns cyan/blue `ON` when pressed to feed aircraft AC/DC buses, toggles off back to `AVAIL`, and shows unlit `DISCONN` when disconnected.
     - Dedicated pushbuttons for BAT 1/2, APU Master/Start/Bleed, Anti-Ice, and Probe Heat.
 - **Core Architecture Enhancements**:
   - Added `cmd_mem` and `step_toggle_dataref` fields to `WidgetConfig` with automatic RREF subscription handling.
@@ -55,7 +55,7 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
     - Leve simmetriche: `SPEEDBRAKE` a 4 posizioni (ARM, RET, 1/2, FULL), switch master `ENG 1 / ENG 2`, selettore rotativo a 3 posizioni `ENG MODE` (CRANK, NORM, IGN/START) e leva `FLAPS` a 5 posizioni.
   - **Pannello Overhead**:
     - Switch luci esterne e cabina convertiti in switch a 2 e 3 posizioni realistici.
-    - Risolto il problema del pulsante `EXT PWR` in volo con dataref corretta (`AirbusFBW/ExtPowOHPArray[0]`).
+    - Logica annunciatore Korry dinamica per `EXT PWR`: mostra l'indicazione verde illuminata `AVAIL` quando la GPU esterna è collegata, commuta in ciano/blu `ON` alla pressione alimentando le sbarre AC/DC dell'aereo, ritorna ad `AVAIL` con un secondo tocco, e appare spento `DISCONN` se disconnessa.
     - Pulsanti per BAT 1/2, APU, Anti-Ice e Probe Heat.
 - **Miglioramenti Architetturali**:
   - Aggiunti i campi `cmd_mem` e `step_toggle_dataref` al modello `WidgetConfig` con gestione automatica RREF.

@@ -387,6 +387,23 @@ function triggerButtonAction(widget, actions) {
     return;
   }
 
+  // ToLiss External Power: 0 = Disconnected, 1 = AVAIL, 2 = ON
+  if (targetDref.includes("ExtPowOHPArray")) {
+    const curVal = Number(actions.getDatarefValue(targetDref) ?? 0.0);
+    if (curVal >= 1.5) {
+      // Currently ON (2) -> turn OFF back to AVAIL (1)
+      actions.writeDataref(targetDref, 1.0);
+    } else if (curVal >= 0.5) {
+      // Currently AVAIL (1) -> switch ON (2)
+      actions.writeDataref(targetDref, 2.0);
+    } else {
+      // Currently Disconnected (0) -> connect GPU and make AVAIL (1)
+      actions.writeDataref("AirbusFBW/EnableExternalPower", 1.0);
+      actions.writeDataref(targetDref, 1.0);
+    }
+    return;
+  }
+
   if (mode === "dref_set") {
     actions.writeDataref(targetDref, Number(widget.on_value ?? 1.0));
   } else if (mode === "dref_toggle") {
@@ -2384,6 +2401,29 @@ export function updateWidgetTelemetry(card, widget, datarefs) {
     }
     const isActive = evaluateLedState(raw, widget);
     card.classList.toggle("is-active", isActive);
+
+    // Special handling for ToLiss EXT PWR (ExtPowOHPArray: 0 = disconnected, 1 = AVAIL [green], 2 = ON [blue/cyan])
+    if (widget.status_dataref && widget.status_dataref.includes("ExtPowOHPArray")) {
+      const pwrState = Number(raw ?? 0);
+      const subEl = card.querySelector(".btn-sublabel");
+      if (pwrState >= 1.5) {
+        // ON (Supplying AC buses) -> Blue/Cyan illumination with "ON"
+        card.classList.add("is-active");
+        card.dataset.color = "cyan";
+        if (subEl) subEl.textContent = "ON";
+      } else if (pwrState >= 0.5) {
+        // AVAIL (Connected, ready) -> Green illumination with "AVAIL"
+        card.classList.add("is-active");
+        card.dataset.color = "green";
+        if (subEl) subEl.textContent = "AVAIL";
+      } else {
+        // Disconnected -> unlit
+        card.classList.remove("is-active");
+        card.dataset.color = "green";
+        if (subEl) subEl.textContent = "DISCONN";
+      }
+    }
+
     const img = card.querySelector(".btn-texture-img");
     if (img) {
       if (isActive && widget.image_on) {
