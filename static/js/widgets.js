@@ -745,11 +745,14 @@ function buildKnobWidget(card, widget, actions) {
     if (hasPull) {
       pullBadge = document.createElement("button");
       pullBadge.type = "button";
-      const isBaroUnit = widget.pull_label === "inHg/hPa" || widget.cmd_pull === "AirbusFBW/BaroUnitCapt";
+      const isBaroUnit = widget.pull_label === "inHg/hPa" || widget.pull_label === "hPa" || widget.pull_label === "inHg" || widget.cmd_pull === "AirbusFBW/BaroUnitCapt";
       pullBadge.className = `knob-cap-btn pull-cap ${isBaroUnit ? "baro-unit-btn" : ""}`;
       const plSub = widget.pull_label && widget.pull_label !== "PULL" ? widget.pull_label : "SEL";
+      const initUnitVal = actions.getDatarefValue("AirbusFBW/BaroUnitCapt");
+      const initIsHg = initUnitVal !== undefined ? Number(initUnitVal) < 0.5 : false;
+      const initialUnitLbl = isBaroUnit ? (initIsHg ? "inHg" : "hPa") : plSub;
       pullBadge.innerHTML = isBaroUnit
-        ? `<span class="cap-val">${escapeHtml(widget.pull_label)}</span>`
+        ? `<span class="cap-val">${escapeHtml(initialUnitLbl)}</span>`
         : `
           <span class="cap-tag">⬆ PULL</span>
           <span class="cap-val">${escapeHtml(plSub)}</span>
@@ -843,7 +846,9 @@ function buildKnobWidget(card, widget, actions) {
 
       // Special handling for Barometer (inHg / hPa dual units)
       if (targetDref.includes("barometer_setting_in_hg")) {
-        const isUnitInHg = (actions.getDatarefValue("AirbusFBW/BaroUnitCapt") ?? 0) >= 0.5;
+        const unitVal = actions.getDatarefValue("AirbusFBW/BaroUnitCapt");
+        // In ToLiss: 0 = inHg, 1 = hPa
+        const isUnitInHg = unitVal !== undefined ? Number(unitVal) < 0.5 : false;
         const step = isUnitInHg ? (isCoarse ? 0.10 : 0.01) : (isCoarse ? 0.2953 : 0.02953);
         let nextBaro = Number(currentRaw) + direction * step;
         nextBaro = Math.max(27.0, Math.min(32.5, nextBaro));
@@ -919,7 +924,7 @@ function buildKnobWidget(card, widget, actions) {
     }, 260);
 
     if (widget.cmd_pull === "AirbusFBW/BaroUnitCapt") {
-      const cur = actions.getDatarefValue(widget.cmd_pull) ?? 0;
+      const cur = actions.getDatarefValue(widget.cmd_pull) ?? 1.0;
       const nextV = cur >= 0.5 ? 0.0 : 1.0;
       actions.writeDataref(widget.cmd_pull, nextV);
       playCockpitTick(nextV >= 0.5 ? 1100 : 850, 16);
@@ -2414,12 +2419,13 @@ export function updateWidgetTelemetry(card, widget, datarefs) {
       }
 
       const unitVal = datarefs["AirbusFBW/BaroUnitCapt"];
-      const isUnitInHg = unitVal !== undefined && Number(unitVal) >= 0.5;
+      // In ToLiss A319: 0 = inHg, 1 = hPa
+      const isUnitInHg = unitVal !== undefined ? Number(unitVal) < 0.5 : false;
       const unitBtn = card.querySelector(".baro-unit-btn");
       if (unitBtn) {
         const capVal = unitBtn.querySelector(".cap-val") || unitBtn;
         capVal.textContent = isUnitInHg ? "inHg" : "hPa";
-        unitBtn.classList.toggle("active", isUnitInHg);
+        unitBtn.classList.toggle("active", !isUnitInHg);
       }
 
       const lcd = card.querySelector(".knob-lcd");

@@ -61,7 +61,7 @@
           "color": "green",
           "action_type": "cmnd",
           "command": "AirbusFBW/LOCbutton",
-          "status_dataref": "sim/cockpit2/autopilot/nav_status",
+          "status_dataref": "AirbusFBW/LOCilluminated",
           "led_threshold": 0.5,
           "led_mode": "threshold",
           "freq_hz": 10
@@ -133,7 +133,7 @@
           "color": "green",
           "action_type": "cmnd",
           "command": "AirbusFBW/EXPEDbutton",
-          "status_dataref": "sim/cockpit2/autopilot/speed_status",
+          "status_dataref": "AirbusFBW/EXPEDilluminated",
           "led_threshold": 0.5,
           "led_mode": "threshold",
           "freq_hz": 5
@@ -150,7 +150,7 @@
           "color": "green",
           "action_type": "cmnd",
           "command": "AirbusFBW/APPRbutton",
-          "status_dataref": "sim/cockpit2/autopilot/approach_status",
+          "status_dataref": "AirbusFBW/APPRilluminated",
           "led_threshold": 0.5,
           "led_mode": "threshold",
           "freq_hz": 10
@@ -443,7 +443,7 @@
           "cmd_push": "AirbusFBW/BaroStdCapt",
           "cmd_pull": "AirbusFBW/BaroUnitCapt",
           "push_label": "STD",
-          "pull_label": "inHg/hPa",
+          "pull_label": "hPa",
           "step_fine": 0.01,
           "step_coarse": 0.1,
           "min_value": 27.0,
@@ -663,8 +663,8 @@
             "UP"
           ],
           "pos_values": [
-            0.0,
-            1.0
+            1.0,
+            0.0
           ],
           "freq_hz": 5
         },

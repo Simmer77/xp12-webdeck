@@ -18,12 +18,13 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
 - **Complete ToLiss A319 Profile Rework**:
   - **FCU & EFIS Tab**:
     - Half-height knobs (`row_span: 1`) stacked symmetrically.
-    - Custom **BARO** knob with integrated `STD` (QNH/Standard toggle) and `inHg/hPa` unit selection buttons, featuring dynamic LCD readout (`Std`, `1013 hPa`, or `29.92 in`).
+    - Custom **BARO** knob with integrated `STD` (QNH/Standard toggle) and `inHg/hPa` unit selection buttons, featuring dynamic LCD readout (`Std`, `1013 hPa`, or `29.92 in`). Fixed unit toggle orientation (`AirbusFBW/BaroUnitCapt`).
+    - Fixed FCU **LOC**, **APPR**, and **EXPED** annunciator lighting by binding to ToLiss native status datarefs (`AirbusFBW/LOCilluminated`, `AirbusFBW/APPRilluminated`, `AirbusFBW/EXPEDilluminated`).
     - Integrated 100/1000 ft altitude step toggle directly inside the **ALTITUDE** knob header (`step_toggle_dataref`), adjusting altitude step dynamically.
     - Integrated EFIS navigation display filters (`CSTR`, `WPT`, `VOR.D`, `NDB`, `ARPT`, `TERR`), Master Warning, Master Caution, and Sidestick Disconnect.
     - Integrated horizontal detented levers for **ND MODE** (LS, VOR, NAV, ARC, PLAN) and **ND RANGE** (10–320 NM).
   - **Pedestal Tab**:
-    - Symmetrical hardware layout with Auto Brk (`LO`, `MED`, `MAX`), `T.O CONFIG`, `CHRONO` (with active green illumination), `GEAR`, `PARK BRAKE`, and compact 1×1 `XPDR`.
+    - Symmetrical hardware layout with Auto Brk (`LO`, `MED`, `MAX`), `T.O CONFIG`, `CHRONO` (with active green illumination), `GEAR` (fixed UP/DOWN orientation), `PARK BRAKE`, and compact 1×1 `XPDR`.
     - Symmetrical levers: 4-position `SPEEDBRAKE` (ARM, RET, 1/2, FULL), 2-position `ENG 1 / ENG 2` Master switches, 3-position `ENG MODE` rotary selector (CRANK, NORM, IGN/START), and 5-position `FLAPS` lever.
   - **Overhead Tab**:
     - Converted all exterior and cabin lighting controls to realistic 2-position and 3-position toggle switches.
@@ -44,12 +45,13 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
 - **Riprogettazione Completa Profilo ToLiss A319**:
   - **Pannello FCU & EFIS**:
     - Knob dimezzati in altezza (`row_span: 1`) accoppiati verticalmente.
-    - Nuovo knob **BARO** con pulsanti integrati `STD` e `inHg/hPa` e lettura dinamica sul display LCD (`Std`, `1013 hPa` o `29.92 in`).
+    - Nuovo knob **BARO** con pulsanti integrati `STD` e `inHg/hPa` e lettura dinamica sul display LCD (`Std`, `1013 hPa` o `29.92 in`). Risolto il verso di commutazione unità (`AirbusFBW/BaroUnitCapt`).
+    - Risolta l'illuminazione dei pulsanti FCU **LOC**, **APPR** ed **EXPED** collegandoli alle dataref native ToLiss (`AirbusFBW/LOCilluminated`, `AirbusFBW/APPRilluminated`, `AirbusFBW/EXPEDilluminated`).
     - Selettore passo quota 100/1000 ft integrato direttamente nell'header del knob **ALTITUDE** (`step_toggle_dataref`), che adatta al volo il passo del knob.
     - Inclusi filtri EFIS ND (`CSTR`, `WPT`, `VOR.D`, `NDB`, `ARPT`, `TERR`), Master Warning, Master Caution e disconnessione rapida sidestick.
     - Selettori a slitta a scatti per **ND MODE** (LS, VOR, NAV, ARC, PLAN) e **ND RANGE** (10–320 NM).
   - **Pannello Pedestal**:
-    - Layout hardware simmetrico con Auto Brk (`LO`, `MED`, `MAX`), `T.O CONFIG`, `CHRONO` (con illuminazione verde attiva), `GEAR`, `PARK BRAKE` e `XPDR` 1×1.
+    - Layout hardware simmetrico con Auto Brk (`LO`, `MED`, `MAX`), `T.O CONFIG`, `CHRONO` (con illuminazione verde attiva), `GEAR` (risolto orientamento leva SU/GIÙ), `PARK BRAKE` e `XPDR` 1×1.
     - Leve simmetriche: `SPEEDBRAKE` a 4 posizioni (ARM, RET, 1/2, FULL), switch master `ENG 1 / ENG 2`, selettore rotativo a 3 posizioni `ENG MODE` (CRANK, NORM, IGN/START) e leva `FLAPS` a 5 posizioni.
   - **Pannello Overhead**:
     - Switch luci esterne e cabina convertiti in switch a 2 e 3 posizioni realistici.
