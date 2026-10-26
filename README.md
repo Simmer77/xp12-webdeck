@@ -61,6 +61,8 @@ cd xp12-webdeck
 #### 3. Connect your Tablet
 Open the browser on your tablet (connected to the same Wi-Fi/LAN) at the URL printed in the terminal (e.g., `http://192.168.1.50:8080`) and add it to your Home Screen for fullscreen cockpit operation.
 
+> 📖 For the complete step-by-step user manual in English (Linux & Windows setup, firewall configuration, fullscreen PWA, touch controls, camera views, and Dataref search), read [**INSTRUCTIONS.md**](INSTRUCTIONS.md).
+
 ### 🤝 Contributing New Aircraft Profiles
 Want to share a profile for the ToLiss A320/A321/A340, FlightFactor, Rotate MD-11, or your favorite GA aircraft? Read [**CONTRIBUTING.md**](CONTRIBUTING.md) to submit your `profiles/<ICAO>.json` via Pull Request!
 
@@ -103,7 +105,7 @@ Comunica direttamente con X-Plane 12 tramite il protocollo binario **UDP nativo*
 3. **Connetti il Tablet:**
    Apri il browser sul tablet collegato alla stessa rete Wi-Fi/LAN all'indirizzo IP mostrato nel terminale (es. `http://192.168.1.50:8080`).
 
-> 📖 Per il manuale completo in italiano (configurazione firewall, PWA a schermo intero, uso dell'Editor Visuale e ricerca di Comandi/Dataref), consulta [**ISTRUZIONI.md**](ISTRUZIONI.md).
+> 📖 Per il manuale completo passo-passo in italiano (configurazione Linux e Windows, firewall, PWA a schermo intero, uso dell'Editor Visuale e ricerca di Comandi/Dataref), consulta [**ISTRUZIONI.md**](ISTRUZIONI.md).
 > 🤝 Vuoi condividere una nuova plancia aereo con la community? Leggi [**CONTRIBUTING.md**](CONTRIBUTING.md)!
 
 ---
@@ -117,7 +119,8 @@ xp12-webdeck/
 ├── requirements.txt      # Lightweight Python dependencies
 ├── run.sh                # Universal launcher for Linux (all distros) & macOS
 ├── run.bat               # Native launcher for Windows
-├── ISTRUZIONI.md         # Complete user manual in Italian
+├── INSTRUCTIONS.md       # Complete user manual in English (Linux & Windows)
+├── ISTRUZIONI.md         # Manuale d'uso completo in italiano (Linux & Windows)
 ├── CONTRIBUTING.md       # Guide for contributing new aircraft profiles (EN/IT)
 └── LICENSE               # MIT License
 ```

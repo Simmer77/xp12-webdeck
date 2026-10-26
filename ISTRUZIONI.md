@@ -1,166 +1,363 @@
-# ✈️ XP12 WebDeck — Manuale d'Uso Completo (Arch Linux & X-Plane 12)
+# ✈️ XP12 WebDeck — Manuale d'Uso Completo (Linux & Windows)
 
-**XP12 WebDeck** trasforma qualsiasi tablet (iPad, Android, Surface) collegato alla tua rete locale Wi-Fi/LAN in un pannello di comando interattivo bidirezionale (stile **Stream Deck + Boeing MCP + Airbus FCU + Garmin G1000**) per **X-Plane 12**.
+**XP12 WebDeck** trasforma qualsiasi tablet (iPad, tablet Android, Microsoft Surface) collegato alla tua rete locale Wi-Fi/LAN in un pannello di comando interattivo bidirezionale (stile **Stream Deck + Boeing MCP + Airbus FCU + Garmin G1000**) per **X-Plane 12**.
 
 * **Zero Plugin richiesti in X-Plane 12:** comunica direttamente tramite il protocollo nativo binario UDP di X-Plane (`CMND`, `DREF`, `RREF` sulla porta `49000`).
-* **Zero Bloat / Niente Docker:** gira nativamente su Arch Linux con Python 3.11+, FastAPI, WebSockets e Vanilla JavaScript ES6.
-* **Bidirezionale in Tempo Reale:** se attivi l'Autopilota o ruoti la prua con il mouse nel cockpit 3D di X-Plane, i LED e i display digitali a 7 segmenti sul tablet si aggiornano istantaneamente (e viceversa).
+* **Zero Bloat / Niente Docker:** gira nativamente su **Linux** (Arch, Debian, Ubuntu, Fedora, openSUSE) e su **Windows** (10/11) con Python 3.11+, FastAPI, WebSockets e Vanilla JavaScript ES6.
+* **Bidirezionale in Tempo Reale:** se attivi l'Autopilota o ruoti una manopola nel cockpit 3D di X-Plane, i LED e i display digitali a 7 segmenti sul tablet si aggiornano istantaneamente (e viceversa).
 
 ---
 
-## 1. Prerequisiti su Arch Linux e Avvio con un Solo Comando
+## Indice dei Contenuti
 
-Assicurati di avere Python 3 installato sul tuo sistema Arch Linux:
+1. [Prerequisiti e Avvio con un Solo Comando (Linux e Windows)](#1-prerequisiti-e-avvio-con-un-solo-comando)
+   * [A. Configurazione su Linux (Arch, Ubuntu/Debian, Fedora, openSUSE)](#a-configurazione-su-linux)
+   * [B. Configurazione su Windows (Windows 10 / 11)](#b-configurazione-su-windows)
+2. [Connessione del Tablet via Wi-Fi / LAN e Modalità Fullscreen (PWA)](#2-connessione-del-tablet-via-wi-fi--lan-e-modalità-fullscreen-pwa)
+   * [Configurazione del Firewall (Linux e Windows)](#configurazione-del-firewall)
+   * [Installazione come Web App a Schermo Intero (iPad e Android)](#installazione-come-web-app-a-schermo-intero)
+3. [Verifica delle Impostazioni UDP in X-Plane 12 (Porta 49000)](#3-verifica-delle-impostazioni-udp-in-x-plane-12-porta-49000)
+4. [Come Usare i Controlli Touch e la Manopola Ibrida a 3 Modalità](#4-come-usare-i-controlli-touch-e-la-manopola-ibrida-a-3-modalità)
+   * [Rilevamento Automatico Profilo (ICAO) vs Selezione Manuale](#rilevamento-automatico-profilo-icao-vs-selezione-manuale)
+   * [La Manopola Ibrida Touch (Hybrid Rotary Knob)](#la-manopola-ibrida-touch-hybrid-rotary-knob)
+5. [Nuova Tab Universale Viste Telecamera (Viste)](#5-nuova-tab-universale-viste-telecamera-viste)
+6. [Come Usare l'Editor Visuale Integrato](#6-come-usare-leditor-visuale-integrato)
+7. [Profili Aereo Inclusi e Personalizzazione dei File JSON](#7-profili-aereo-inclusi-e-personalizzazione-dei-file-json)
+8. [Ricerca di Comandi e Dataref in X-Plane 12](#8-ricerca-di-comandi-e-dataref-in-x-plane-12)
+9. [Risoluzione Problemi & Domande Frequenti (FAQ)](#9-risoluzione-problemi--domande-frequenti-faq)
 
-```bash
-sudo pacman -S --needed python iproute2
-```
+---
 
-Per avviare **XP12 WebDeck**, apri un terminale nella cartella del progetto ed esegui:
+<a name="1-prerequisiti-e-avvio-con-un-solo-comando"></a>
+## 1. Prerequisiti e Avvio con un Solo Comando
+
+XP12 WebDeck include script di avvio automatici (`run.sh` per Linux/macOS e `run.bat` per Windows) che creano l'ambiente virtuale dedicato (`.venv`), installano o sincronizzano le dipendenze da `requirements.txt`, rilevano l'indirizzo IP locale e avviano il server.
+
+---
+
+<a name="a-configurazione-su-linux"></a>
+### A. Configurazione su Linux (Arch, Ubuntu/Debian, Fedora, openSUSE)
+
+#### 1. Installa Python 3 e le utility di rete
+
+Apri il terminale della tua distribuzione ed esegui il comando corrispondente:
+
+* **Arch Linux / Manjaro:**
+  ```bash
+  sudo pacman -S --needed python iproute2
+  ```
+* **Debian / Ubuntu / Linux Mint / Pop!_OS:**
+  ```bash
+  sudo apt update
+  sudo apt install python3 python3-venv python3-pip iproute2
+  ```
+* **Fedora / RHEL:**
+  ```bash
+  sudo dnf install python3 iproute
+  ```
+* **openSUSE:**
+  ```bash
+  sudo zypper install python3 python3-virtualenv iproute2
+  ```
+
+#### 2. Avvia XP12 WebDeck
+
+Posizionati nella cartella del progetto ed esegui `run.sh`:
 
 ```bash
 chmod +x run.sh
 ./run.sh
 ```
 
-### Cosa fa `run.sh` automaticamente:
-1. Controlla se esiste l'ambiente virtuale `.venv`. Se non esiste, lo crea automaticamente (`python -m venv .venv`) e installa i pacchetti leggeri elencati in `requirements.txt` (`fastapi`, `uvicorn`, `pydantic`, `python-multipart`, `httpx`).
-2. Rileva l'indirizzo IP della tua scheda di rete locale (es. `192.168.1.50`) e stampa chiaramente nel terminale l'URL esatto da aprire sul tablet.
-3. Avvia il server FastAPI/Uvicorn in ascolto su `0.0.0.0:8080`.
+Lo script provvederà in automatico a:
+1. Verificare la presenza di Python 3 e del modulo `venv`.
+2. Creare la cartella `.venv` (se non esiste) e installare i pacchetti (`fastapi`, `uvicorn`, `pydantic`, `httpx`).
+3. Individuare l'indirizzo IP della scheda di rete (es. `192.168.1.50`).
+4. Avviare il server web su `0.0.0.0:8080`.
 
 ---
 
+<a name="b-configurazione-su-windows"></a>
+### B. Configurazione su Windows (Windows 10 / 11)
+
+#### 1. Installa Python 3 su Windows
+
+1. Scarica l'installer di Python 3 (versione 3.11 o successiva) dal sito ufficiale [python.org/downloads](https://www.python.org/downloads/).
+2. Esegui il file di installazione scaricato.
+3. ⚠️ **PASSAGGIO FONDAMENTALE:** Nella primissima schermata dell'installer, metti la spunta in basso su:
+   **☑ Add python.exe to PATH**
+4. Fai clic su **Install Now**.
+
+*(In alternativa tramite `winget`: apri il prompt ed esegui `winget install Python.Python.3.12`)*.
+
+#### 2. Avvia XP12 WebDeck
+
+Apri Esplora File nella cartella di `xp12-webdeck`:
+* **Opzione 1 (Doppio clic):** fai doppio clic sul file **`run.bat`**.
+* **Opzione 2 (Prompt dei comandi / PowerShell):**
+  ```cmd
+  cd percorso\a\xp12-webdeck
+  run.bat
+  ```
+
+Lo script Windows provvederà in automatico a:
+1. Rilevare il comando `python` o `py -3`.
+2. Creare l'ambiente virtuale (`.venv\Scripts\activate.bat`) e installare `requirements.txt`.
+3. Rilevare gli indirizzi IPv4 delle schede di rete attive.
+4. Avviare il server Uvicorn su `0.0.0.0:8080`.
+
+---
+
+<a name="2-connessione-del-tablet-via-wi-fi--lan-e-modalità-fullscreen-pwa"></a>
 ## 2. Connessione del Tablet via Wi-Fi / LAN e Modalità Fullscreen (PWA)
 
-1. Collega il tuo tablet alla **stessa rete Wi-Fi / LAN** del PC Arch Linux su cui gira X-Plane 12.
-2. Apri il browser del tablet (Safari su iPadOS, Chrome/Brave/Firefox su Android) e digita l'indirizzo mostrato nel terminale, ad esempio:
+1. Collega il tablet (iPad, tablet Android, Surface) alla **stessa rete Wi-Fi o cablata (LAN)** del computer su cui gira XP12 WebDeck.
+2. Apri il browser del tablet (Safari su iOS/iPadOS; Chrome, Brave o Firefox su Android/Windows).
+3. Digita l'indirizzo mostrato nel terminale o prompt dei comandi, ad esempio:
    ```text
    http://192.168.1.50:8080
    ```
+   *(Sostituisci `192.168.1.50` con l'IP effettivo stampato all'avvio).*
 
-### Configurazione del Firewall su Arch Linux (se usi `ufw` o `firewalld`)
-Se il tablet non riesce a raggiungere la pagina ma sul PC `http://127.0.0.1:8080` funziona, apri la porta `8080/tcp` sulla tua rete locale:
+---
 
-* **Con UFW:**
+<a name="configurazione-del-firewall"></a>
+### Configurazione del Firewall (Linux e Windows)
+
+Se il browser locale del PC apre correttamente `http://127.0.0.1:8080` ma il tablet non riesce a raggiungere la pagina, il firewall di sistema sta bloccando le connessioni in ingresso sulla porta TCP `8080`.
+
+#### Su Linux:
+* **UFW (Ubuntu / Debian / Mint):**
   ```bash
-  sudo ufw allow 8080/tcp
+  sudo ufw allow 8080/tcp comment "XP12 WebDeck"
   ```
-* **Con firewalld:**
+* **Firewalld (Fedora / RHEL / openSUSE):**
   ```bash
   sudo firewall-cmd --add-port=8080/tcp --permanent
   sudo firewall-cmd --reload
   ```
-* **Con nftables / iptables:** consenti il traffico in ingresso sulla porta TCP `8080` proveniente dalla subnet LAN (es. `192.168.0.0/16`).
+* **iptables / nftables:**
+  Consenti il traffico TCP in ingresso sulla porta `8080` proveniente dalla subnet della LAN (es. `192.168.0.0/16`).
 
-### Installazione come Web App a Schermo Intero (Senza barre del browser)
-XP12 WebDeck include un file `manifest.json` e i meta tag per funzionare come **PWA a schermo intero**:
-* **Su Android (Chrome):** tocca il menu `⋮` in alto a destra $\rightarrow$ **"Aggiungi a schermata Home"** (oppure *"Installa applicazione"*).
-* **Su iPad (Safari):** tocca il pulsante **Condividi** (quadrato con freccia verso l'alto) $\rightarrow$ **"Aggiungi alla schermata Home"**.
-* Aprendo l'icona **XP12 WebDeck** dalla Home del tablet, il pannello si aprirà a tutto schermo in orientamento orizzontale (Landscape). Puoi anche toccare il pulsante **`⛶`** nella barra in alto in qualsiasi momento per attivare il Fullscreen.
+#### Su Windows:
+Al primo avvio di `run.bat`, Windows Defender Firewall mostrerà un avviso chiedendo se consentire a Python di comunicare sulla rete:
+1. Assicurati che sia spuntata la casella **☑ Reti private (rete domestica o aziendale)**.
+2. Fai clic su **Consenti accesso**.
+
+Per aprire manualmente la porta TCP 8080 su Windows:
+* Apri **Prompt dei Comandi** o **PowerShell** come Amministratore ed esegui:
+  ```cmd
+  netsh advfirewall firewall add rule name="XP12 WebDeck (Port 8080)" dir=in action=allow protocol=TCP localport=8080 profile=private,domain
+  ```
 
 ---
 
+<a name="installazione-come-web-app-a-schermo-intero"></a>
+### Installazione come Web App a Schermo Intero (PWA)
+
+XP12 WebDeck è una Progressive Web App ottimizzata per eliminare qualsiasi barra del browser:
+
+* **Su iPad (Safari):**
+  1. Tocca il pulsante **Condividi** (il quadrato con la freccia verso l'alto) in alto a destra.
+  2. Scorri e tocca **"Aggiungi alla schermata Home"**.
+  3. Conferma con **Aggiungi**. Aprendo la web app dalla Home, si aprirà a schermo intero senza barre né schede.
+* **Su Android (Chrome / Brave / Firefox):**
+  1. Tocca il menu con i tre puntini `⋮` in alto a destra.
+  2. Tocca **"Aggiungi a schermata Home"** (o *"Installa applicazione"*).
+* **Pulsante Schermo Intero (`⛶`):**
+  Puoi anche toccare il pulsante **`⛶`** nella barra in alto in qualsiasi momento per attivare il fullscreen del browser.
+
+---
+
+<a name="3-verifica-delle-impostazioni-udp-in-x-plane-12-porta-49000"></a>
 ## 3. Verifica delle Impostazioni UDP in X-Plane 12 (Porta 49000)
 
-In X-Plane 12 il protocollo UDP è attivo di default, ma puoi verificarlo in 10 secondi:
+XP12 WebDeck sfrutta il protocollo nativo UDP di X-Plane 12 sulla porta `49000`:
 
-1. Avvia **X-Plane 12** e apri **Impostazioni (Settings)** $\rightarrow$ scheda **Rete (Network)**.
-2. Espandi la sezione **UDP Ports** (in basso):
-   * Verifica che **"Port we receive on (modern)"** sia impostata su **`49000`** (valore predefinito).
-3. Non serve attivare *"Send network data output"* manuale: XP12 WebDeck sottoscrive autonomamente i soli Dataref necessari tramite pacchetti binari `RREF` e li disiscrive quando cambi profilo!
-4. Quando un volo è caricato in X-Plane 12:
-   * L'indicatore in alto passerà da **`XP12 ATTESA (49000)`** (ambra) a **`XP12 LIVE (49000)`** (verde).
-   * Il riquadro **`ACF ICAO`** mostrerà automaticamente il codice dell'aereo caricato (es. `C172`, `E55P`, `B738`, `A319`).
+1. Avvia **X-Plane 12** ed entra in **Impostazioni (Settings)** $\rightarrow$ scheda **Rete (Network)**.
+2. Espandi la sezione **UDP Ports** in basso:
+   * Verifica che **"Port we receive on (modern)"** sia impostata su **`49000`** (predefinita).
+3. **Nessuna configurazione manuale di output dati:** XP12 WebDeck sottoscrive automaticamente solo i dataref del profilo attivo via pacchetti binari `RREF`, disiscrivendoli al cambio di profilo.
+4. Quando un volo è caricato nel simulatore:
+   * L'indicatore in alto passa da **`XP12 ATTESA (49000)`** (ambra) a **`XP12 LIVE (49000)`** (verde).
+   * La casella **`ACF ICAO`** mostra automaticamente il codice dell'aereo (es. `B738`, `A319`, `E55P`, `C172`).
 
-> **Nota se X-Plane 12 gira su un altro PC della LAN:** clicca direttamente sulla spia **`XP12 LIVE / ATTESA (49000)`** nella barra superiore di WebDeck per inserire l'IP del PC simulatore.
-
----
-
-## 4. Come Usare i Controlli e la Manopola Ibrida (Hybrid Rotary Knob)
-
-### A. Rilevamento Automatico Profilo (`AUTO-SWITCH`) vs Selezione Manuale
-* Quando **`AUTO-SWITCH: ON`** è attivo (spia verde), non appena cambi aereo in X-Plane 12 il tablet carica automaticamente il profilo corrispondente (`profiles/<ICAO>.json`), oppure `DEFAULT.json` se non hai ancora creato un profilo specifico per quell'ICAO.
-* Se voli con un aereo add-on che usa un codice ICAO particolare o vuoi forzare manualmente un profilo (es. usare il profilo `B738`, `A319` o `E55P`), puoi disattivare `AUTO-SWITCH` o scegliere qualsiasi profilo dal menu a tendina in alto a destra.
-
-### B. La Manopola Ibrida a 3 Modalità (`knob`)
-Progettata specificamente per evitare la frustrazione delle manopole rotative sui touchscreen durante il volo:
-
-1. **Swipe / Trascinamento Continuo sul Quadrante SVG:**
-   * Appoggia il dito al centro della manopola e trascina **verso l'alto / verso destra** per incrementare, oppure **verso il basso / verso sinistra** per decrementare. Vedrai la ghiera SVG ruotare con feedback sonoro tattile.
-2. **Pulsanti Laterali Rapidi (`--`, `-`, `+`, `++`):**
-   * **`-` / `+` (Passo Fine / Anello Interno Garmin):** singolo tocco per variazioni fini (es. $\pm 1^\circ$ HDG, $\pm 100\text{ ft}$ ALT, $\pm 0.01\text{ inHg}$ BARO, oppure `FMS Inner Ring` sul Garmin G1000). Tenendo premuto il pulsante, il valore scorre rapidamente a ripetizione.
-   * **`--` / `++` (Passo Largo / Anello Esterno Garmin):** singolo tocco per variazioni ampie (es. $\pm 10^\circ$ HDG, $\pm 1000\text{ ft}$ ALT, oppure `FMS Outer Ring` sul G1000).
-3. **Interazione Push / Pull (Stile Airbus FCU & Garmin Cursor):**
-   * **PUSH (Pressione Manopola):** fai un **singolo Tap** al centro della manopola (oppure tocca il badge sinistro es. `● MNGD` / `PUSH CRSR` / `SYNC`).
-   * **PULL (Trazione Manopola):** tieni premuto il centro della manopola per **400 ms (Long-Press)**, oppure tocca direttamente il badge destro `▼ SEL` / `PULL`.
+> **💡 X-Plane 12 su un altro computer della rete locale:**  
+> Se WebDeck gira su un portatile o Raspberry Pi e X-Plane 12 su un PC dedicato, tocca la spia **`XP12 LIVE / ATTESA (49000)`** nella barra in alto di WebDeck per inserire l'indirizzo IP del PC con X-Plane 12.
 
 ---
 
-## 5. Come Usare l'Editor Visuale Integrato e Caricare Immagini Personalizzate
+<a name="4-come-usare-i-controlli-touch-e-la-manopola-ibrida-a-3-modalità"></a>
+## 4. Come Usare i Controlli Touch e la Manopola Ibrida a 3 Modalità
 
-Non serve scrivere codice per personalizzare i tuoi pannelli:
+<a name="rilevamento-automatico-profilo-icao-vs-selezione-manuale"></a>
+### Rilevamento Automatico Profilo (`AUTO-SWITCH`) vs Selezione Manuale
 
-1. Tocca il pulsante **`✎ EDIT`** in alto a destra nella barra di navigazione (diventerà ambra **`✓ FINE EDIT`**).
-2. **Aggiungere o Configurare Schede (Tab):**
-   * Nella barra delle schede compaiono i pulsanti **`＋ Nuova Scheda`**, **`⚙ Griglia / Nome`** (per cambiare il numero di colonne e righe, es. da `6x3` a `8x4`) e **`🗑 Elimina Scheda`**.
-3. **Aggiungere un Nuovo Controllo:**
-   * Tocca una qualsiasi cella vuota tratteggiata con il simbolo **`＋`**.
-4. **Modificare o Eliminare un Controllo Esistente:**
-   * Tocca il controllo che desideri modificare per aprire la finestra **Configura Controllo**.
-   * Puoi cambiare il tipo (`Button`, `Knob`, `Slider`, `Display`), l'etichetta, il colore del LED (`green`, `amber`, `cyan`, `red`, `white`, `magenta`), l'ampiezza in griglia (`Row Span` e `Col Span`), i comandi `CMND` e i Dataref `DREF`/`RREF`.
-5. **Caricare Immagini / Texture Personalizzate per i Pulsanti:**
-   * Nella finestra di configurazione di un `Button`, usa il pulsante **`📤 Carica Nuova Texture Pulsante (PNG/JPG/SVG)`** per caricare dal tablet o dal PC le tue texture per lo stato spento (`Texture Pulsante OFF`) e acceso (`Texture Pulsante ON`).
-   * Le immagini vengono salvate automaticamente nella cartella locale `static/assets/buttons/` e restano sempre disponibili nei menu a tendina.
-6. Clicca su **`💾 Salva nel Profilo JSON`**: le modifiche vengono scritte istantaneamente nel file `profiles/<ICAO>.json` e sincronizzate con tutti i dispositivi connessi.
+* Con **`AUTO-SWITCH: ON`** (spia verde), quando carichi un nuovo aereo in X-Plane 12 il tablet passa istantaneamente al profilo corrispondente (`profiles/<ICAO>.json`), oppure a `DEFAULT.json` se non esiste un profilo dedicato.
+* Puoi disattivare `AUTO-SWITCH` o selezionare manualmente qualsiasi profilo dal menu a tendina in alto a destra in ogni momento.
 
 ---
 
-## 6. Modifica Manuale dei File JSON e Ricerca di Comandi/Dataref in X-Plane 12
+<a name="la-manopola-ibrida-touch-hybrid-rotary-knob"></a>
+### La Manopola Ibrida Touch (Hybrid Rotary Knob)
 
-Tutti i profili sono salvati come file JSON leggibili e formattati (`indent=2`) nella cartella `profiles/`:
-* `profiles/DEFAULT.json` — **Profilo Universale X-Plane 12 (Griglia 8x4, 3 Schede)**:
-  * Ottimizzato con i comandi e dataref ufficiali di `X-Plane 12/Resources/plugins/Commands.txt` e `DataRefs.txt`.
-  * **3 Schede**: *Autopilot & PFD* (`AP`, `FD`, `YD`, `A/THR`, `HDG`, `NAV`, `APR`, `BC`, `FLC`, `VNAV`, `ALT`, `VS`, `CDI SRC`, `TO/GA`, `MSTR WARN/CAUT` + 6 manopole ibride `CRS 1`, `IAS/MACH`, `HEADING + BANK`, `ALTITUDE`, `VERT SPEED`, `BARO STD`), *Garmin G1000 & Radio Stack* (`D➔`, `FPL`, `PROC`, `MENU`, `CLR`, `ENT`, `PFD/MFD POPUP`, doppie manopole concentriche `PFD FMS` e `MFD FMS`, `MAP RANGE`, tuning radio `COM 1 8.33 kHz` e `NAV 1` con `XFER ⇄`, `SQUAWK` + `IDENT`), *Systems, Ice, Lights & Controls* (`BATT 1`, `GEN 1`, `AVIONICS`, `FUEL PUMP`, `GPU POWER`, `IGNITION`, `SEATBELTS`, Luci, Anti-Ice completi, manopola `PITCH TRIM`, `PARK BRAKE`, `GEAR`, `SPEEDBRAKE` e `FLAPS`).
-* `profiles/B738.json` — **Boeing 737-800X (Zibo Mod)**:
-  * **Auto-Switch automatico (`B738`)**: costruito sui comandi e dataref nativi Zibo `laminar/B738/*` (`B738_Commands.txt` e `B738_Datarefs.txt`).
-  * **3 Schede dedicate**: *Zibo 737-800X MCP* (`F/D CAPT`, `A/T ARM`, `N1`, `SPEED`, `VNAV`, `LVL CHG`, `HDG SEL`, `LNAV`, `VOR LOC`, `APP`, `ALT HLD`, `V/S`, `CMD A/B`, `CWS A/B`, `C/O`, `SPD INTV` e manopole ibride `COURSE`, `IAS/MACH` con `SPD INTV`/`C/O`, `HDG & BANK ANGLE`, `ALTITUDE` con `ALT INTV`, `VERT SPEED`), *EFIS, Display & Autobrake* (pulsanti mappa `WXR/STA/WPT/ARPT/DATA/POS/TERR`, `FPV`, `MTRS`, `MFD ENG/SYS`, `TO/GA`, `A/P DISENGAGE`, `FIRE WARN`, `MASTER CAUT`, `SIX PACK`, `ZIBO EFB` e manopole `BARO STD`, `MINS RST`, `ND MODE CTR`, `ND RANGE TFC`, `AUTOBRAKE`), *Zibo Overhead, Start & Pedestal* (`BATTERY`, `GND PWR`, `APU START/GEN/BLEED`, `FUEL PUMPS`, `WINDOW/PROBE/WING/ENG ANTI-ICE`, `LANDING ALL`, `TAXI`, `POS STROBE`, manopole `ENG 1/2 START GRD/OFF/CONT`, `ENG 1/2 IDLE/CUTOFF`, `PARK BRAKE`, `GEAR`, `SPEEDBRAKE` e `FLAPS`).
-* `profiles/E55P.json` — **Embraer Phenom 300 (Aerobask Prodigy Touch)**:
-  * **Auto-Switch automatico (`E55P`)**: usa i comandi e dataref nativi Aerobask (`aerobask/gfc700_*`, `sim/GPS/g1000n3_*`, `sim/GPS/gcu478/*`, `aerobask/g1000/pb_syn_*`, `aerobask/iceprot/*`, `aerobask/electrical/*`, `aerobask/engines/*`).
-  * **3 Schede dedicate**: *GFC700 Autopilot* (incluso `CSC` Cruise Speed Control, manopola `ALT` doppia concentrica 100/1000 ft e `BARO/IESI STD`), *GCU 477 & Synoptics* (tastierino FMS completo + pulsanti pagine sinottiche MFD `STAT`, `FUEL`, `ELEC`, `A-ICE` + apertura EFB Tablet), *Overhead, Ice & Pedestal* (Batterie, GPU Cart + Ext Pwr, De-Ice, Luci, manopole `ENG 1/2 START-STOP`, `T/O CONFIG`, Speedbrake, Carrello e Flaps).
-* `profiles/A319.json` — **Airbus A319 (ToLiss AirbusFBW)**:
-  * **Auto-Switch automatico (`A319`)**: usa i comandi e dataref proprietari ToLiss `AirbusFBW/*` estratti direttamente dall'aereo (`AirbusFBW/PushSPDSel`, `AirbusFBW/PullSPDSel`, `AirbusFBW/PushHDGSel`, `AirbusFBW/PullHDGSel`, `AirbusFBW/PushAltitude`, `AirbusFBW/PullAltitude`, `AirbusFBW/PushVSSel`, `AirbusFBW/PullVSSel`, `AirbusFBW/AP1Engage`, `AirbusFBW/ATHRbutton`, ecc.).
-  * **3 Schede dedicate**: *ToLiss FCU & EFIS* (manopole ibride FCU con Push `[∙]` Managed e Pull Selected, `100/1000`, `HDG/TRK`, `BARO STD`), *EFIS ND & ECAM Panel* (filtri ND `CSTR/WPT/VORD/NDB/ARPT/TERR`, manopole `ND MODE` e `ND RANGE`, tutte le 12 pagine ECAM SD `ENG..STS`, `T.O CONFIG`, `EMER CANC` e `AUTOBRAKE LO/MED/MAX`), *Overhead, APU & Pedestal* (`BAT 1/2`, `EXT PWR`, `APU MASTER/START/BLEED`, Anti-Ice, Luci `OHPLightSwitches`, `ENG MODE`, `ENG 1/2 MASTER`, Speedbrake e Flaps).
+Progettata per eliminare la frustrazione delle manopole virtuali sui display touch durante le fasi di volo:
 
-### Modifica con un Editor di Testo e Hot-Reload
-Puoi aprire qualsiasi file in `profiles/` con `nano`, `nvim`, `kate` o `vscode`, modificare o copiare blocchi di widget e poi cliccare sul pulsante **`↻ JSON`** nella barra superiore del tablet per ricaricare immediatamente il file dal disco senza riavviare il server!
-
-### Esempio di Struttura di un Widget nel JSON
-```json
-{
-  "id": "btn_hdg",
-  "type": "button",
-  "row": 0,
-  "col": 2,
-  "row_span": 1,
-  "col_span": 1,
-  "label": "HDG SEL",
-  "sublabel": "HEADING",
-  "color": "green",
-  "action_type": "cmnd",
-  "command": "sim/autopilot/heading",
-  "status_dataref": "sim/cockpit2/autopilot/heading_mode",
-  "led_threshold": 0.5,
-  "led_mode": "threshold",
-  "freq_hz": 5
-}
+```
+┌────────────────────────────────────────────────────────┐
+│ ALTITUDE                                  [100 / 1000] │  <-- Header & Selettore Passo
+│  ┌──────────────────────────────────────────────────┐  │
+│  │                   34000 FT                       │  │  <-- Display LCD a 7 segmenti
+│  └──────────────────────────────────────────────────┘  │
+│  ┌──────┬─────┐      ┌────────────┐      ┌─────┬──────┐  │
+│  │  --  │  -  │      │  ( ( 🎛️ ) ) │      │  +  │  ++  │  │  <-- Tasti Laterali & Ghiera SVG
+│  └──────┴─────┘      └────────────┘      └─────┴──────┘  │
+│  [ ● MNGD ]                                [ ▼ SEL ]   │  <-- Badge Push / Pull Touch
+└────────────────────────────────────────────────────────┘
 ```
 
-### Come Trovare Comandi (`CMND`) e Dataref (`DREF`/`RREF`) in X-Plane 12 (Inclusi ToLiss, Zibo, FlightFactor)
-1. **File Ufficiali di X-Plane 12:**
-   All'interno della cartella di installazione di X-Plane 12 trovi due file di testo completi con tutti i comandi e dataref nativi:
+1. **Trascinamento / Swipe continuo sul quadrante SVG:**
+   * Tieni premuto il centro della manopola e trascina **in alto / a destra** per incrementare, oppure **in basso / a sinistra** per decrementare.
+2. **Pulsanti laterali a tocco rapido (`--`, `-`, `+`, `++`):**
+   * **`-` / `+` (Passo Fine / Anello Interno Garmin):** tocco singolo per variazioni fini (es. $\pm 1^\circ$ HDG, $\pm 100\text{ ft}$ ALT, $\pm 0.01\text{ inHg}$ BARO o ghiera interna FMS Garmin). **Tenendo premuto**, il valore scorre a ripetizione ad alta velocità.
+   * **`--` / `++` (Passo Ampio / Anello Esterno Garmin):** tocco singolo per variazioni ampie (es. $\pm 10^\circ$ HDG, $\pm 1000\text{ ft}$ ALT o ghiera esterna FMS Garmin).
+3. **Interazione Push / Pull (Stile Airbus FCU e Cursore Garmin):**
+   * **PUSH (Pressione):** un **tocco singolo** al centro della manopola (oppure tocca il badge sinistro es. `● MNGD`, `PUSH CRSR`, `SYNC`, `STD`).
+   * **PULL (Estrazione):** tieni premuto il centro per **400 ms (Long-Press)**, oppure tocca direttamente il badge destro `▼ SEL` / `PULL`.
+4. **Selettori di Passo e Unità Integrati:**
+   * Nei profili avanzati (es. Airbus ToLiss), il commutatore `100/1000 ft` e i tasti Baro `STD` e `inHg/hPa` sono integrati nell'intestazione della manopola stessa, massimizzando lo spazio a schermo.
+
+---
+
+<a name="5-nuova-tab-universale-viste-telecamera-viste"></a>
+## 5. Nuova Tab Universale Viste Telecamera (Viste)
+
+In tutti i profili aereo è inclusa una scheda dedicata **Viste** con griglia da 32 pulsanti cockpit ($8 \times 4$):
+
+```
+┌───────────────────────────────────────┬───────────────────────────────────────┐
+│           16 VISTE INTERNE            │           16 VISTE ESTERNE            │
+│         (Quick Look da 0 a 15)        │       (Esterne e Quick Look 16-19)    │
+├───────────────────┬───────────────────┼───────────────────┬───────────────────┤
+│ Posto Comand. [✎] │ Posto Primo Uff[✎]│ Inseguimento[✎]   │ Orbita 360° [✎]   │
+│ Glareshield   [✎] │ Console Centr. [✎]│ Spot Lineare[✎]   │ Spot Fisso  [✎]   │
+│ Overhead      [✎] │ Pedestal       [✎]│ Ride Along  [✎]   │ Vista Torre [✎]   │
+│ Ala Sinistra  [✎] │ Ala Destra     [✎]│ Vista Pista [✎]   │ Telecamera Lib[✎] │
+│ Cabina Avanti [✎] │ Cabina Dietro  [✎]│ Prua Pulita [✎]   │ Vista HUD   [✎]   │
+│ Finestrino S1 [✎] │ Finestrino D1  [✎]│ Vista Alare [✎]   │ Cinema Cam  [✎]   │
+│ FMC / CDU     [✎] │ Fusibili / CB  [✎]│ Esterna 1   [✎]   │ Esterna 2   [✎]   │
+│ Dettaglio Pil.[✎] │ Tablet EFB     [✎]│ Esterna 3   [✎]   │ Esterna 4   [✎]   │
+└───────────────────┴───────────────────┴───────────────────┴───────────────────┘
+```
+
+### Funzionalità Principali:
+* **Retroilluminazione della Vista Attiva:** Comportamento stile radio button: la telecamera attiva si accende con una spia LED e bagliore colorato, spegnendo le altre.
+* **Ridenominazione Etichette al Volo (Live In-Place):** Tocca l'icona matita `✎` o fai doppio tocco sul pulsante. Compare un campo modificabile in cui scrivere il nome desiderato (es. *"Oblò Motore Sinistro"*). Premendo `Invio` o la spunta verde il nome viene salvato immediatamente nel file JSON del profilo su disco.
+* **Memorizzazione Istantanea della Posizione (`cmd_mem`):**
+  Per salvare la posizione corrente della telecamera 3D in uno slot Quick Look, **tieni premuto il pulsante per ~750 ms**. Un suono di notifica nel cockpit confermerà l'avvenuta memorizzazione senza dover usare combinazioni di tastiera.
+
+---
+
+<a name="6-come-usare-leditor-visuale-integrato"></a>
+## 6. Come Usare l'Editor Visuale Integrato
+
+Non è necessario modificare file manualmente per personalizzare le plance:
+
+1. Tocca il pulsante **`✎ EDIT`** in alto a destra (diventerà ambra **`✓ FINE EDIT`**).
+2. **Gestione Schede:**
+   * Compaiono i tasti **`＋ Nuova Scheda`**, **`⚙ Griglia / Nome`** (per cambiare le dimensioni da `6x3` a `8x4` o superiori) e **`🗑 Elimina Scheda`**.
+3. **Aggiunta di un Nuovo Controllo:**
+   * Tocca una casella vuota tratteggiata con il simbolo **`＋`**.
+4. **Modifica o Rimozione di Controlli:**
+   * Tocca qualsiasi elemento per aprire la finestra di configurazione.
+   * Personalizza tipologia (`Button`, `Knob`, `Slider`, `Display`), etichette, colore LED (`green`, `amber`, `cyan`, `red`, `white`, `magenta`), dimensioni in griglia, comandi `CMND` e dataref `DREF`/`RREF`.
+5. **Caricamento di Texture Personalizzate:**
+   * Nei pulsanti, fai clic su **`📤 Carica Nuova Texture Pulsante`** per caricare immagini PNG, JPG o SVG per lo stato spento e acceso. Le immagini vengono archiviate in `static/assets/buttons/`.
+6. Tocca **`💾 Salva nel Profilo JSON`** per applicare e salvare le modifiche su disco.
+
+---
+
+<a name="7-profili-aereo-inclusi-e-personalizzazione-dei-file-json"></a>
+## 7. Profili Aereo Inclusi e Personalizzazione dei File JSON
+
+Tutti i profili sono salvati in formato JSON formattato nella cartella `profiles/`:
+
+### 1. `DEFAULT.json` — Profilo Universale X-Plane 12 (Griglia 8x4)
+Pronto all'uso per tutti gli aerei generici di X-Plane 12 (Cessna 172, King Air C90, Baron 58, Cirrus SR22, Liner di default):
+* **Tab 1: Autopilot & PFD:** Annunciatori autopilota completi + 6 manopole ibride (`CRS`, `IAS`, `HDG+BANK`, `ALT`, `VS`, `BARO`).
+* **Tab 2: Garmin G1000 & Radio Stack:** Tasti FMS G1000, manopole concentriche `PFD FMS` / `MFD FMS`, sintonia radio 8.33 kHz `COM 1` / `NAV 1` con pulsanti di scambio, Transponder e Ident.
+* **Tab 3: Systems, Ice, Lights & Controls:** Impianto elettrico, pompe carburante, GPU, accensione, sbrinamento, luci, carrello, freno di stazionamento, flap e diruttori.
+* **Tab 4: Viste:** 32 viste telecamera (16 interne / 16 esterne).
+
+### 2. `B738.json` — Boeing 737-800X (Zibo Mod)
+Costruito sui comandi e dataref nativi Zibo `laminar/B738/*`:
+* **Tab 1: MCP & Flight Deck:** Autopilota completo MCP con `SPD/ALT INTV`, Bank Angle e manopole ibride dedicate.
+* **Tab 2: EFIS, Display & Autobrake:** Filtri mappa ND, Master Warning/Caution, Six Pack, richiamo EFB tablet Zibo, manopole Minimi, Baro, Modo/Range ND e Autobrake.
+* **Tab 3: Overhead, Start & Pedestal:** Batterie, alimentazione di terra, APU, pompe carburante, avviamento motori `GRD/CONT`, leve cutoff, freno di stazionamento, carrello e flap.
+* **Tab 4: Viste:** 32 viste cockpit e cabina del 737.
+
+### 3. `E55P.json` — Aerobask Embraer Phenom 300
+Ottimizzato per avionica Aerobask Prodigy Touch:
+* **Tab 1: GFC700 Autopilot:** `AP`, `FD`, `YD`, cruise speed control `CSC`, manopola quota concentrica 100/1000 ft e Baro STD.
+* **Tab 2: GCU 477 & Synoptics:** Tastierino alfanumerico FMS completo e scorciatoie per pagine sinottiche MFD (`STAT`, `FUEL`, `ELEC`, `A-ICE`) + apertura tablet EFB.
+* **Tab 3: Overhead, Ice & Pedestal:** Batterie, carrello GPU, selettori rotativi motori, diruttori, carrello e flap.
+* **Tab 4: Viste:** 32 posizioni telecamera dedicate al Phenom 300.
+
+### 4. `A319.json` — ToLiss Airbus A319
+Sviluppato con dataref proprietarie `AirbusFBW/*`:
+* **Tab 1: FCU & EFIS:** Manopole FCU Airbus con logica Push `[∙]` Managed e Pull Selected, selettore passo quota `100/1000 ft` integrato, manopola Baro con `STD` e `inHg/hPa`. Annunciatori reali FCU (`LOC`, `APPR`, `EXPED`).
+* **Tab 2: Pedestal:** Autobrake (`LO`, `MED`, `MAX`), `T.O CONFIG`, Chrono con illuminazione verde attiva, leva carrello orientata, freno di parcheggio, Transponder 1x1, Speedbrake a 4 posizioni, leve Master motori e leva Flap.
+* **Tab 3: Overhead:** Interruttori realistici luci esterne, APU, Anti-Ice, e pulsante Korry **`EXT PWR`** con logica autentica a doppio colore:
+  * **Spento (`DISCONN`):** Generatore GPU esterno non presente o scollegato.
+  * **Verde (`AVAIL`):** Generatore GPU collegato all'aereo e pronto all'uso.
+  * **Ciano/Blu (`ON`):** Contattore chiuso, alimentazione attiva sulle sbarre AC/DC dell'aereo.
+* **Tab 4: Viste:** 32 posizioni telecamera dedicate all'A319.
+
+---
+
+<a name="8-ricerca-di-comandi-e-dataref-in-x-plane-12"></a>
+## 8. Ricerca di Comandi e Dataref in X-Plane 12
+
+1. **File di testo ufficiali di X-Plane 12:**
+   Nella cartella principale di installazione di X-Plane 12 sono inclusi gli elenchi completi dei comandi e dataref nativi:
    * `X-Plane 12/Resources/plugins/Commands.txt`
    * `X-Plane 12/Resources/plugins/DataRefs.txt`
-2. **Dalla Finestra Tastiera/Joystick di X-Plane 12:**
-   Aprendo *Impostazioni $\rightarrow$ Tastiera*, passando il mouse sopra qualsiasi comando (anche quelli specifici di aeromobili add-on come **Zibo 737** `laminar/B738/...` o **ToLiss Airbus** `AirbusFBW/...` / `toliss_airbus/...`), X-Plane mostra un tooltip con il percorso esatto del comando (es. `laminar/B738/autopilot/cmd_a_press`).
-3. **Con DataRefTool (Consigliato per profili avanzati):**
-   Il plugin gratuito open-source *DataRefTool* per X-Plane 12 permette di filtrare in tempo reale i Dataref e i Comandi che cambiano valore quando premi un pulsante nel cockpit 3D e copiarne il nome negli appunti con un clic.
+2. **Tooltip nelle Impostazioni di Gioco (Tastiera / Joystick):**
+   Passando il mouse sopra qualsiasi comando nelle impostazioni di X-Plane 12 (inclusi add-on come ToLiss `AirbusFBW/...` o Zibo `laminar/B738/...`), apparirà un tooltip con il percorso esatto del comando.
+3. **DataRefTool (DRT) — Consigliato:**
+   Il plugin gratuito open-source *DataRefTool* consente di monitorare e filtrare in tempo reale comandi e dataref mentre si azionano i controlli nel cockpit 3D.
+
+---
+
+<a name="9-risoluzione-problemi--domande-frequenti-faq"></a>
+## 9. Risoluzione Problemi & Domande Frequenti (FAQ)
+
+### D1: Il tablet mostra "Impossibile raggiungere il sito" o va in timeout.
+* **Soluzione:**
+  1. Assicurati che il tablet sia connesso alla stessa rete Wi-Fi / subnet del computer (evita le reti "Guest" o "Ospiti" che isolano i dispositivi tra loro).
+  2. Verifica che il firewall di sistema consenta il traffico in ingresso sulla porta TCP `8080`.
+     * Su Windows, esegui dal Prompt dei comandi (Amministratore):
+       `netsh advfirewall firewall add rule name="XP12 WebDeck" dir=in action=allow protocol=TCP localport=8080`
+     * Su Linux, esegui: `sudo ufw allow 8080/tcp` (o `sudo firewall-cmd --add-port=8080/tcp --permanent`).
+  3. Su Windows, assicurati che la connessione di rete sia impostata come **Privata** e non Pubblica.
+
+### D2: La spia rimane su `XP12 ATTESA (49000)` e non diventa verde.
+* **Soluzione:**
+  1. Assicurati che un volo sia effettivamente caricato in X-Plane 12 (non nel menu principale).
+  2. Controlla in X-Plane 12 (*Impostazioni $\rightarrow$ Rete $\rightarrow$ UDP Ports*) che **Port we receive on** sia impostata su `49000`.
+  3. Se X-Plane 12 gira su un altro PC, fai clic sulla spia in alto e inserisci l'indirizzo IP del PC con il simulatore.
+
+### D3: Errore su Windows: "'python' non è riconosciuto come comando interno o esterno".
+* **Soluzione:**
+  Rilancia l'installer di Python da [python.org](https://www.python.org/downloads/), seleziona **Modify** e assicurati di spuntare **☑ Add python.exe to PATH**. Riavvia `run.bat`.
+
+### D4: Errore su Ubuntu / Debian: "No module named venv".
+* **Soluzione:**
+  Ubuntu e Debian richiedono il pacchetto del virtual environment separato. Installalo con:
+  ```bash
+  sudo apt update && sudo apt install python3-venv python3-pip
+  ```
+
+---
+
+*Buon volo con XP12 WebDeck! Rilasciato con licenza open-source MIT.*

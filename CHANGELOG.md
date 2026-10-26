@@ -33,6 +33,9 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
 - **Core Architecture Enhancements**:
   - Added `cmd_mem` and `step_toggle_dataref` fields to `WidgetConfig` with automatic RREF subscription handling.
   - Added `actions.saveWidgetLabel` for real-time live persisting of widget labels.
+- **Documentation**:
+  - Added comprehensive English user manual [`INSTRUCTIONS.md`](INSTRUCTIONS.md) detailing prerequisites, one-command launch, firewall rules, and touch operations for both Linux (Arch, Ubuntu/Debian, Fedora, openSUSE) and Windows (10/11 with `run.bat`).
+  - Updated Italian user manual [`ISTRUZIONI.md`](ISTRUZIONI.md) to comprehensively cover Windows alongside all Linux distributions.
 
 ### 🇮🇹 Italiano
 - **Nuova Tab Universale "Viste" per tutti i profili aereo (`A319`, `E55P`, `B738`, `DEFAULT`)**:
@@ -60,6 +63,9 @@ Tutte le novità e gli aggiornamenti significativi di **XP12 WebDeck** sono docu
 - **Miglioramenti Architetturali**:
   - Aggiunti i campi `cmd_mem` e `step_toggle_dataref` al modello `WidgetConfig` con gestione automatica RREF.
   - Aggiunta funzione `actions.saveWidgetLabel` per la persistenza live delle etichette nel profilo attivo.
+- **Documentazione**:
+  - Aggiunto il manuale utente completo in lingua inglese [`INSTRUCTIONS.md`](INSTRUCTIONS.md) con istruzioni dettagliate per sistemi sia Linux che Windows (`run.bat`), configurazione firewall e guida ai controlli.
+  - Aggiornato il manuale utente in italiano [`ISTRUZIONI.md`](ISTRUZIONI.md) includendo il supporto completo per ambienti Windows e Linux.
 
 ---
 
