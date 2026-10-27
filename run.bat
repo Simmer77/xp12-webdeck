@@ -1,20 +1,17 @@
 @echo off
 REM =============================================================================
-REM XP12 WebDeck — Native Windows Launcher Script (run.bat)
+REM XP12 WebDeck -- Native Windows Launcher Script (run.bat)
 REM =============================================================================
 setlocal EnableDelayedExpansion
 chcp 65001 >nul 2>&1
 
 cd /d "%~dp0"
 
-if "%WEBDECK_PORT%"=="" (
-    set "PORT=8080"
-) else (
-    set "PORT=%WEBDECK_PORT%"
-)
+set "PORT=8080"
+if not "%WEBDECK_PORT%"=="" set "PORT=%WEBDECK_PORT%"
 
 echo ==================================================================
-echo   XP12 WebDeck — Native LAN Touch Command Deck for X-Plane 12
+echo   XP12 WebDeck -- Native LAN Touch Command Deck for X-Plane 12
 echo ==================================================================
 
 REM 1. Detect Python launcher (python or py -3)
@@ -39,10 +36,10 @@ if "%PYTHON_CMD%"=="" (
 
 REM 2. Check or create Virtual Environment (.venv)
 if not exist ".venv\Scripts\activate.bat" (
-    echo [INFO] Creating Python virtual environment ^(.venv^)...
+    echo [INFO] Creating Python virtual environment (.venv)...
     %PYTHON_CMD% -m venv .venv
     if !ERRORLEVEL! NEQ 0 (
-        echo [ERROR] Failed to create virtual environment ^(.venv^).
+        echo [ERROR] Failed to create virtual environment (.venv).
         pause
         exit /b 1
     )
@@ -62,7 +59,7 @@ if not exist ".venv\Scripts\activate.bat" (
 REM 3. Display local IPv4 addresses for Tablet Wi-Fi / LAN connection
 echo.
 echo ------------------------------------------------------------------
-echo   TABLET CONNECTION / CONNESSIONE TABLET ^(Wi-Fi / LAN^):
+echo   TABLET CONNECTION / CONNESSIONE TABLET (Wi-Fi / LAN):
 for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /R /C:"IPv4"') do (
     set "IP_ADDR=%%a"
     set "IP_ADDR=!IP_ADDR: =!"
@@ -74,12 +71,12 @@ for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /R /C:"IPv4"') do (
 )
 echo.
 echo   Local PC Browser:   http://127.0.0.1:%PORT%
-echo   X-Plane 12 UDP:     127.0.0.1:49000 ^(Zero Plugins Required^)
+echo   X-Plane 12 UDP:     127.0.0.1:49000 (Zero Plugins Required)
 echo ------------------------------------------------------------------
 echo   Press CTRL+C to stop the server / Premi CTRL+C per arrestare.
 echo ==================================================================
 echo.
 
 REM 4. Start Uvicorn server
-uvicorn app.main:app --host 0.0.0.0 --port %PORT%
+python -m uvicorn app.main:app --host 0.0.0.0 --port %PORT%
 pause
